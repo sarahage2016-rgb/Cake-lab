@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#5c2414">
+<title>Cake Lab — Administration</title>
+<style>
+:root{
+  --choco:#5a2415; --choco-2:#75331f; --choco-3:#3a170e;
+  --ivory:#fffaf3; --cream:#f7eee3; --cream-2:#efe0cf;
+  --ink:#2f211b; --muted:#7b695f; --line:#e6d3c0;
+  --white:#fff; --green:#2f7c4a; --red:#a83333; --gold:#b88424;
+  --shadow:0 16px 48px rgba(72,34,17,.10);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:linear-gradient(180deg,#fffaf4,#f7ecdf);min-height:100vh}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{display:grid;grid-template-columns:258px 1fr;min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;padding:25px 18px 20px;background:linear-gradient(180deg,#4a1c10,#632817 62%,#40170d);color:#fff;display:flex;flex-direction:column;z-index:30}
+.brand{font-family:Georgia,serif;font-weight:800;font-size:29px;letter-spacing:.7px}.brand span{font-weight:400;color:#efbd77}.brand-sub{font-size:10px;letter-spacing:3px;opacity:.78;margin-top:3px;margin-bottom:26px}
+.nav{display:grid;gap:8px}.navbtn{border:0;background:transparent;color:#fff;text-align:left;padding:12px 13px;border-radius:12px;display:flex;align-items:center;gap:10px;font-weight:700}.navbtn:hover,.navbtn.active{background:rgba(255,255,255,.13)}.navico{width:22px;text-align:center}
+.side-bottom{margin-top:auto}.sync{border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:12px;background:rgba(255,255,255,.07);font-size:12px;line-height:1.45}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#f1b94f;margin-right:7px}.logout{width:100%;margin-top:10px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;padding:10px;border-radius:11px}
+.main{width:100%;max-width:1480px;margin:auto;padding:26px 28px 50px}.topbar{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:20px}.title h1{font:800 31px Georgia,serif;margin:0}.title p{margin:5px 0 0;color:var(--muted);font-size:14px}.top-actions{display:flex;gap:9px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:10px 14px;border-radius:11px;font-weight:800;box-shadow:0 2px 8px rgba(60,30,18,.03)}.btn:hover{transform:translateY(-1px)}.btn.primary{background:var(--choco);border-color:var(--choco);color:#fff}.btn.soft{background:#fff8f0}.btn.red{color:var(--red)}.btn.icon{padding:9px 11px}
+.notice{display:flex;gap:11px;align-items:flex-start;background:#fff8e8;border:1px solid #ecd69e;border-radius:14px;padding:12px 14px;font-size:13px;line-height:1.45;margin-bottom:18px}.notice b{color:#6a4712}
+.stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:20px}.stat{background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:17px;padding:16px;box-shadow:var(--shadow)}.stat .value{font-size:28px;font-weight:900;color:var(--choco);line-height:1}.stat .label{font-size:12px;color:var(--muted);margin-top:7px;font-weight:700}.stat .mini{font-size:11px;color:#9b877d;margin-top:3px}
+.view{display:none}.view.active{display:block}.panel{background:rgba(255,255,255,.88);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:17px;margin-bottom:18px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:14px}.panel-head h2{font:800 23px Georgia,serif;margin:0}.panel-head p{margin:3px 0 0;font-size:13px;color:var(--muted)}
+.toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:0 11px;min-width:250px}.search input{border:0;outline:0;padding:10px 0;width:100%;background:transparent}.select{border:1px solid var(--line);border-radius:11px;background:#fff;padding:10px 12px;outline:0}.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:800}.chip.active{background:var(--choco);color:#fff;border-color:var(--choco)}
+.products{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.product{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;position:relative}.thumb{height:180px;background:#f2e4d4;overflow:hidden;display:grid;place-items:center}.thumb img{width:100%;height:100%;object-fit:cover}.thumb-empty{font-size:46px;opacity:.24}.statusline{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;gap:7px;pointer-events:none}.pill{background:rgba(255,255,255,.93);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.7);padding:5px 8px;border-radius:999px;font-size:10px;font-weight:900;box-shadow:0 5px 16px rgba(0,0,0,.07)}.pill.month{background:#fff0b9;color:#79520a}.pill.new{background:#f8dfd1;color:#7a2c18}.pill.off{background:#eee;color:#666}.product-body{padding:14px}.line{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.pname{font:800 19px Georgia,serif}.pprice{font-weight:900;color:var(--choco);white-space:nowrap}.cat{font-size:11px;color:#8b7468;text-transform:uppercase;letter-spacing:.8px;margin-top:3px}.pdesc{font-size:12.5px;color:var(--muted);line-height:1.42;min-height:36px;margin:8px 0 12px}.card-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.smallbtn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px;font-size:12px;font-weight:800}.smallbtn:hover{background:#fff8f0}.smallbtn.red{color:var(--red)}.empty{border:1px dashed var(--line);border-radius:16px;padding:36px;text-align:center;color:var(--muted);background:#fff;grid-column:1/-1}
+.month-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}.month-card{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#fff}.month-hero{height:260px;background:#f0e1d0;overflow:hidden}.month-hero img{width:100%;height:100%;object-fit:cover}.month-body{padding:17px}.month-title{font:800 25px Georgia,serif}.month-desc{color:var(--muted);font-size:13px;line-height:1.5;margin:7px 0}.month-price{font-size:22px;font-weight:900;color:var(--choco)}.month-side{display:grid;gap:12px}.hint{border:1px solid var(--line);border-radius:16px;background:#fff;padding:15px}.hint h3{margin:0 0 8px;font:800 18px Georgia,serif}.hint p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+.new-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.new-empty{padding:30px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:16px;background:#fff;grid-column:1/-1}
+.modal-back{position:fixed;inset:0;background:rgba(39,20,13,.52);display:none;align-items:center;justify-content:center;padding:16px;z-index:100}.modal-back.show{display:flex}.modal{width:min(780px,100%);max-height:94vh;overflow:auto;background:#fffaf6;border-radius:22px;padding:20px;box-shadow:0 30px 90px rgba(0,0,0,.25)}.modal-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:15px}.modal h3{margin:0;font:800 25px Georgia,serif}.close{border:0;background:#f1e6da;border-radius:10px;width:36px;height:36px;font-size:18px}.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:grid;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:12px;font-weight:900;color:#624d42}.field input,.field select,.field textarea{border:1px solid var(--line);border-radius:11px;padding:11px 12px;background:#fff;outline:0}.field textarea{min-height:94px;resize:vertical}.checks{display:flex;flex-wrap:wrap;gap:13px;padding:5px 0}.checks label{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700}.preview{height:200px;border:1px dashed var(--line);border-radius:14px;background:#f9f1e7;display:grid;place-items:center;overflow:hidden}.preview img{width:100%;height:100%;object-fit:cover}.preview span{color:var(--muted);font-size:13px}.modal-foot{display:flex;justify-content:flex-end;gap:9px;margin-top:16px}.danger-zone{margin-top:15px;border-top:1px solid var(--line);padding-top:14px}.danger-zone .btn{font-size:12px}
+.toast{position:fixed;right:18px;bottom:18px;background:#2d201a;color:#fff;border-radius:12px;padding:11px 14px;font-size:13px;font-weight:800;display:none;z-index:200;box-shadow:0 12px 30px rgba(0,0,0,.2)}.toast.show{display:block}
+.login-cover{position:fixed;inset:0;background:linear-gradient(135deg,#3e170d,#6e2c18);display:none;align-items:center;justify-content:center;z-index:300;padding:18px}.login-cover.show{display:flex}.login-box{width:min(410px,100%);background:#fffaf5;border-radius:22px;padding:25px;box-shadow:0 30px 90px rgba(0,0,0,.3)}.login-brand{font:900 30px Georgia,serif;color:var(--choco);margin-bottom:2px}.login-sub{font-size:12px;letter-spacing:2px;color:#8c7265;margin-bottom:20px}.login-box .field{margin-bottom:11px}.login-note{font-size:11px;color:#8d7569;line-height:1.4;margin-top:10px}
+@media(max-width:1100px){.stats{grid-template-columns:repeat(3,1fr)}.products,.new-grid{grid-template-columns:repeat(2,1fr)}.month-layout{grid-template-columns:1fr}}
+@media(max-width:850px){.app{grid-template-columns:1fr}.sidebar{height:auto;position:sticky;top:0;padding:12px 14px;display:block}.brand{font-size:23px}.brand-sub{margin-bottom:10px}.nav{display:flex;overflow:auto;gap:6px}.navbtn{white-space:nowrap;font-size:12px;padding:9px 11px}.side-bottom{display:none}.main{padding:16px 14px 40px}.topbar{align-items:flex-start;flex-direction:column}.title h1{font-size:26px}.stats{grid-template-columns:repeat(2,1fr)}.panel-head{align-items:flex-start;flex-direction:column}.toolbar{width:100%}.search{min-width:0;flex:1}.products,.new-grid{grid-template-columns:1fr 1fr}.thumb{height:155px}}
+@media(max-width:600px){.products,.new-grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.form{grid-template-columns:1fr}.field.full{grid-column:auto}.top-actions{width:100%}.top-actions .btn{flex:1}.month-hero{height:220px}.card-actions{grid-template-columns:1fr 1fr}.notice{font-size:12px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">CAKE LAB <span>♡</span></div>
+    <div class="brand-sub">ADMINISTRATION</div>
+    <nav class="nav">
+      <button class="navbtn active" data-view="dashboard"><span class="navico">⌂</span>Tableau de bord</button>
+      <button class="navbtn" data-view="products"><span class="navico">▦</span>Produits</button>
+      <button class="navbtn" data-view="month"><span class="navico">★</span>Cake du mois</button>
+      <button class="navbtn" data-view="new"><span class="navico">✦</span>Nouveautés</button>
+      <button class="navbtn" data-view="snacks"><span class="navico">◫</span>Snacks & biscuits</button>
+    </nav>
+    <div class="side-bottom">
+      <div class="sync"><span class="dot"></span><b>Mode local</b><br>Interface prête. Connexion Supabase à faire avant publication réelle.</div>
+      <button class="logout" type="button" id="lockBtn">Verrouiller l’écran</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="title"><h1>Tableau de bord</h1><p id="subtitle">Gérez le catalogue Cake Lab sans modifier la mise en page du site public.</p></div>
+      <div class="top-actions">
+        <button class="btn" id="importBtn">Importer</button>
+        <button class="btn" id="exportBtn">Sauvegarder</button>
+        <button class="btn primary" id="addBtn">+ Ajouter un produit</button>
+      </div>
+    </div>
+
+    <div class="notice"><div>⚠️</div><div><b>Le site public reste verrouillé.</b> Cette administration fonctionne pour l’instant en mode local. Elle ne changera rien sur <b>cake-lab.pages.dev</b> tant qu’on n’aura pas connecté Supabase et validé ensemble la synchronisation.</div></div>
+
+    <section class="stats" id="stats">
+      <div class="stat"><div class="value" id="statTotal">0</div><div class="label">Produits</div><div class="mini">Toutes catégories</div></div>
+      <div class="stat"><div class="value" id="statOnline">0</div><div class="label">En ligne</div><div class="mini">Produits visibles</div></div>
+      <div class="stat"><div class="value" id="statHidden">0</div><div class="label">Masqués</div><div class="mini">Non visibles</div></div>
+      <div class="stat"><div class="value" id="statNew">0</div><div class="label">Nouveautés</div><div class="mini">Mis en avant</div></div>
+      <div class="stat"><div class="value" id="statSnack">0</div><div class="label">Snacks</div><div class="mini">Biscuits & snacks</div></div>
+    </section>
+
+    <section class="view active" id="view-dashboard">
+      <div class="panel">
+        <div class="panel-head"><div><h2>Produits récents</h2><p>Accès rapide aux produits du catalogue.</p></div><button class="btn soft" data-go="products">Voir tout le catalogue</button></div>
+        <div class="products" id="recentGrid"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div><h2>Cake du mois</h2><p>Produit actuellement mis en avant.</p></div><button class="btn soft" data-go="month">Gérer</button></div>
+        <div id="dashboardMonth"></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-products">
+      <div class="panel">
+        <div class="panel-head">
+          <div><h2>Catalogue</h2><p>Ajoutez, modifiez, masquez ou supprimez vos produits.</p></div>
+          <div class="toolbar"><div class="search">⌕ <input id="searchInput" placeholder="Rechercher un produit"></div><select class="select" id="sortSelect"><option value="order">Ordre du catalogue</option><option value="name">Nom A–Z</option><option value="priceAsc">Prix croissant</option><option value="priceDesc">Prix décroissant</option></select></div>
+        </div>
+        <div class="chips" id="filterChips">
+          <button class="chip active" data-filter="all">Tous</button>
+          <button class="chip" data-filter="cake">Cakes</button>
+          <button class="chip" data-filter="box">Box</button>
+          <button class="chip" data-filter="snack">Snacks & biscuits</button>
+          <button class="chip" data-filter="hidden">Masqués</button>
+        </div>
+        <div class="products" id="productGrid"></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-month">
+      <div class="panel">
+        <div class="panel-head"><div><h2>Cake du mois</h2><p>Choisissez le produit qui sera présenté comme Cake du mois.</p></div><button class="btn primary" id="changeMonthBtn">Changer le Cake du mois</button></div>
+        <div class="month-layout"><div id="monthCurrent"></div><div class="month-side"><div class="hint"><h3>Comment ça fonctionnera</h3><p>Une fois Supabase connecté, changer le Cake du mois ici mettra à jour automatiquement son nom, sa description, son prix et sa photo sur le site public.</p></div><div class="hint"><h3>Un seul Cake du mois</h3><p>Quand vous en choisissez un nouveau, l’ancien est automatiquement retiré de cette mise en avant mais reste dans votre catalogue.</p></div></div></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-new">
+      <div class="panel"><div class="panel-head"><div><h2>Nouveautés</h2><p>Produits marqués « nouveauté » pour les mettre en avant.</p></div><button class="btn primary" id="addNewBtn">+ Ajouter une nouveauté</button></div><div class="new-grid" id="newGrid"></div></div>
+    </section>
+
+    <section class="view" id="view-snacks">
+      <div class="panel"><div class="panel-head"><div><h2>Snacks & biscuits</h2><p>Cette catégorie est déjà prête pour vos futures boîtes de biscuits, cookies, Rice Krispies et autres snacks.</p></div><button class="btn primary" id="addSnackBtn">+ Ajouter un snack</button></div><div class="new-grid" id="snackGrid"></div></div>
+    </section>
+  </main>
+</div>
+
+<div class="modal-back" id="productModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="modalTitle">Ajouter un produit</h3><button class="close" id="closeModal">×</button></div>
+    <div class="form">
+      <div class="field"><label>Catégorie</label><select id="fCategory"><option value="cake">Cake</option><option value="box">Box</option><option value="snack">Snack / biscuit</option></select></div>
+      <div class="field"><label>Prix (FCFA)</label><input id="fPrice" type="number" min="0" step="500" placeholder="10000"></div>
+      <div class="field full"><label>Nom du produit</label><input id="fName" maxlength="80" placeholder="Ex. Cake Chocolat"></div>
+      <div class="field full"><label>Description</label><textarea id="fDescription" maxlength="260" placeholder="Description courte affichée sur le site"></textarea></div>
+      <div class="field"><label>Ordre d’affichage</label><input id="fOrder" type="number" min="1" step="1" placeholder="1"></div>
+      <div class="field"><label>Image actuelle / chemin</label><input id="fImagePath" placeholder="cl-chocolat.webp"></div>
+      <div class="field full"><label>Nouvelle photo</label><input id="fImage" type="file" accept="image/*"><div class="preview" id="imagePreview"><span>Aperçu de la photo</span></div></div>
+      <div class="field full"><div class="checks"><label><input id="fActive" type="checkbox" checked> Produit visible</label><label><input id="fNew" type="checkbox"> Marquer comme nouveauté</label><label id="monthCheckLabel"><input id="fMonth" type="checkbox"> Définir comme Cake du mois</label></div></div>
+    </div>
+    <div class="modal-foot"><button class="btn" id="cancelModal">Annuler</button><button class="btn primary" id="saveProduct">Enregistrer</button></div>
+    <div class="danger-zone" id="dangerZone" style="display:none"><button class="btn red" id="deleteProduct">Supprimer définitivement ce produit</button></div>
+  </div>
+</div>
+
+<div class="modal-back" id="monthModal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head"><h3>Choisir le Cake du mois</h3><button class="close" data-close-month>×</button></div>
+    <div class="field"><label>Produit</label><select id="monthSelect"></select></div>
+    <div class="modal-foot"><button class="btn" data-close-month>Annuler</button><button class="btn primary" id="saveMonth">Définir comme Cake du mois</button></div>
+  </div>
+</div>
+
+<input type="file" id="importFile" accept="application/json" hidden>
+<div class="toast" id="toast"></div>
+
+<div class="login-cover" id="lockScreen">
+  <div class="login-box">
+    <div class="login-brand">CAKE LAB ♡</div><div class="login-sub">ADMINISTRATION</div>
+    <div class="field"><label>Code local de prévisualisation</label><input id="unlockCode" type="password" placeholder="Entrez votre code"></div>
+    <button class="btn primary" id="unlockBtn" style="width:100%;margin-top:4px">Ouvrir l’administration</button>
+    <div class="login-note">Ce verrou est seulement une protection locale de prévisualisation. La vraie connexion sécurisée sera faite avec Supabase Auth avant mise en ligne de l’administration.</div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY='cakeLabAdminV2';
+const LOCK_KEY='cakeLabAdminUnlocked';
+const LOCAL_CODE='2580'; // simple verrou de prévisualisation, pas une sécurité serveur
+
+const seed=[
+{id:'chocolat',category:'cake',name:'Cake Chocolat',description:'Chocolat intense et ultra moelleux.',price:10000,image:'cl-chocolat.webp',active:true,isNew:false,isMonth:false,order:1},
+{id:'citron',category:'cake',name:'Cake Citron',description:'Citron frais et moelleux pour une explosion de saveurs.',price:10000,image:'cl-citron.webp',active:true,isNew:false,isMonth:false,order:2},
+{id:'coco',category:'cake',name:'Cake Coco',description:'Un cake moelleux aux notes délicates de coco.',price:10000,image:'cl-coco.webp',active:true,isNew:false,isMonth:false,order:3},
+{id:'moka',category:'cake',name:'Cake Moka Café',description:'Délicieux mélange de café intense et de saveurs gourmandes.',price:10000,image:'cl-moka.webp',active:true,isNew:false,isMonth:false,order:4},
+{id:'mangue',category:'cake',name:'Cake Mangue Vanille',description:'Alliance parfaite entre la mangue fruitée et la vanille douce.',price:10000,image:'cl-mangue.webp',active:true,isNew:false,isMonth:false,order:5},
+{id:'vanille',category:'cake',name:'Cake Vanille',description:'Vanille intense et moelleux incomparable.',price:10000,image:'cl-vanille.webp',active:true,isNew:false,isMonth:false,order:6},
+{id:'bissap',category:'cake',name:'Cake Bissap Vanille',description:'L’alliance fleurie du bissap et de la vanille, un goût unique.',price:11000,image:'cl-bissap.webp',active:true,isNew:true,isMonth:true,order:7},
+{id:'teranga',category:'box',name:'Box Teranga',description:'4 mini cakes : Bissap Vanille, Guerté, Bouye Vanille et Gingembre Vanille.',price:12000,image:'cl-box-teranga.webp',active:true,isNew:false,isMonth:false,order:8},
+{id:'gourmande',category:'box',name:'Box Gourmande',description:'4 mini cakes gourmands.',price:12000,image:'cl-box-gourmande.webp',active:true,isNew:false,isMonth:false,order:9},
+{id:'douceur',category:'box',name:'Box Douceur',description:'4 mini cakes : Chocolat, Mocha Café, Vanille et Coco.',price:12000,image:'cl-box-douceur.webp',active:true,isNew:false,isMonth:false,order:10},
+{id:'exotique',category:'box',name:'Box Exotique',description:'4 mini cakes : Citron, Mangue Vanille, Coco et Vanille.',price:12000,image:'cl-box-exotique.webp',active:true,isNew:false,isMonth:false,order:11}
+];
+
+let products=loadProducts();
+let activeView='dashboard', filter='all', search='', sort='order', editingId=null, pendingImage='';
+
+function clone(x){return JSON.parse(JSON.stringify(x))}
+function loadProducts(){try{const v=JSON.parse(localStorage.getItem(STORAGE_KEY));return Array.isArray(v)&&v.length?v:clone(seed)}catch(e){return clone(seed)}}
+function persist(){localStorage.setItem(STORAGE_KEY,JSON.stringify(products));renderAll()}
+function fmtPrice(n){return new Intl.NumberFormat('fr-FR').format(Number(n||0))+' F'}
+function catLabel(c){return c==='cake'?'Cake':c==='box'?'Box':'Snack / biscuit'}
+function esc(s=''){return String(s).replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]))}
+function id(){return 'p_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7)}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),2200)}
+function imgSrc(p){return p.imageData||p.image||''}
+
+function card(p){
+ const src=imgSrc(p);
+ const pills=[p.isMonth?'<span class="pill month">Cake du mois</span>':'',p.isNew?'<span class="pill new">Nouveauté</span>':'',!p.active?'<span class="pill off">Masqué</span>':''].filter(Boolean).join('');
+ return `<article class="product">
+   <div class="thumb">${src?`<img src="${esc(src)}" alt="${esc(p.name)}">`:'<div class="thumb-empty">🍰</div>'}</div>
+   <div class="statusline"><div>${pills}</div><span class="pill">${esc(catLabel(p.category))}</span></div>
+   <div class="product-body"><div class="line"><div><div class="pname">${esc(p.name)}</div><div class="cat">${esc(catLabel(p.category))}</div></div><div class="pprice">${fmtPrice(p.price)}</div></div>
+   <div class="pdesc">${esc(p.description||'Aucune description')}</div>
+   <div class="card-actions"><button class="smallbtn" onclick="openEdit('${p.id}')">Modifier</button><button class="smallbtn" onclick="toggleActive('${p.id}')">${p.active?'Masquer':'Réactiver'}</button><button class="smallbtn" onclick="duplicateProduct('${p.id}')">Dupliquer</button><button class="smallbtn red" onclick="quickDelete('${p.id}')">Supprimer</button></div></div>
+ </article>`
+}
+
+function filteredProducts(){let arr=[...products]; if(filter==='hidden') arr=arr.filter(p=>!p.active); else if(filter!=='all') arr=arr.filter(p=>p.category===filter); if(search) arr=arr.filter(p=>(p.name+' '+p.description).toLowerCase().includes(search.toLowerCase())); if(sort==='name')arr.sort((a,b)=>a.name.localeCompare(b.name,'fr')); else if(sort==='priceAsc')arr.sort((a,b)=>a.price-b.price); else if(sort==='priceDesc')arr.sort((a,b)=>b.price-a.price); else arr.sort((a,b)=>(a.order||999)-(b.order||999)); return arr}
+
+function renderStats(){
+ document.getElementById('statTotal').textContent=products.length;
+ document.getElementById('statOnline').textContent=products.filter(p=>p.active).length;
+ document.getElementById('statHidden').textContent=products.filter(p=>!p.active).length;
+ document.getElementById('statNew').textContent=products.filter(p=>p.isNew).length;
+ document.getElementById('statSnack').textContent=products.filter(p=>p.category==='snack').length;
+}
+function renderProducts(){const arr=filteredProducts();document.getElementById('productGrid').innerHTML=arr.length?arr.map(card).join(''):'<div class="empty">Aucun produit dans cette sélection.</div>'}
+function renderRecent(){const arr=[...products].sort((a,b)=>(b.updated||0)-(a.updated||0)||a.order-b.order).slice(0,3);document.getElementById('recentGrid').innerHTML=arr.map(card).join('')}
+function renderMonth(){const p=products.find(x=>x.isMonth); const html=p?`<div class="month-card"><div class="month-hero">${imgSrc(p)?`<img src="${esc(imgSrc(p))}" alt="">`:''}</div><div class="month-body"><div class="month-title">${esc(p.name)}</div><div class="month-desc">${esc(p.description)}</div><div class="month-price">${fmtPrice(p.price)}</div></div></div>`:'<div class="empty">Aucun Cake du mois défini.</div>'; document.getElementById('monthCurrent').innerHTML=html; document.getElementById('dashboardMonth').innerHTML=html}
+function renderNew(){const arr=products.filter(p=>p.isNew);document.getElementById('newGrid').innerHTML=arr.length?arr.map(card).join(''):'<div class="new-empty">Aucune nouveauté pour le moment.</div>'}
+function renderSnacks(){const arr=products.filter(p=>p.category==='snack');document.getElementById('snackGrid').innerHTML=arr.length?arr.map(card).join(''):'<div class="new-empty">Aucun snack pour le moment. La catégorie est prête quand vous voudrez commencer.</div>'}
+function renderAll(){renderStats();renderProducts();renderRecent();renderMonth();renderNew();renderSnacks()}
+
+function switchView(v){activeView=v;document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+v));document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active',x.dataset.view===v));const titles={dashboard:['Tableau de bord','Gérez le catalogue Cake Lab sans modifier la mise en page du site public.'],products:['Produits','Ajoutez, modifiez, masquez ou supprimez des produits.'],month:['Cake du mois','Changez facilement le produit mis en avant chaque mois.'],new:['Nouveautés','Choisissez les produits à mettre en avant comme nouveautés.'],snacks:['Snacks & biscuits','Préparez vos futures boîtes de biscuits et snacks.']};document.querySelector('.title h1').textContent=titles[v][0];document.getElementById('subtitle').textContent=titles[v][1];window.scrollTo({top:0,behavior:'smooth'})}
+
+document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>switchView(b.dataset.view));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>switchView(b.dataset.go));
+document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{filter=b.dataset.filter;document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('active',x===b));renderProducts()});
+document.getElementById('searchInput').oninput=e=>{search=e.target.value;renderProducts()};document.getElementById('sortSelect').onchange=e=>{sort=e.target.value;renderProducts()};
+
+function openAdd(category='cake',markNew=false){editingId=null;pendingImage='';document.getElementById('modalTitle').textContent='Ajouter un produit';document.getElementById('dangerZone').style.display='none';fillForm({category,price:10000,name:'',description:'',order:products.length+1,image:'',active:true,isNew:markNew,isMonth:false});showProductModal()}
+function openEdit(pid){const p=products.find(x=>x.id===pid);if(!p)return;editingId=pid;pendingImage=p.imageData||'';document.getElementById('modalTitle').textContent='Modifier le produit';document.getElementById('dangerZone').style.display='block';fillForm(p);showProductModal()}
+function fillForm(p){fCategory.value=p.category||'cake';fPrice.value=p.price||'';fName.value=p.name||'';fDescription.value=p.description||'';fOrder.value=p.order||'';fImagePath.value=p.image||'';fActive.checked=p.active!==false;fNew.checked=!!p.isNew;fMonth.checked=!!p.isMonth;fImage.value='';updateMonthCheck();updatePreview(p.imageData||p.image||'')}
+function showProductModal(){productModal.classList.add('show')}
+function hideProductModal(){productModal.classList.remove('show')}
+function updateMonthCheck(){const isCake=fCategory.value==='cake';monthCheckLabel.style.display=isCake?'flex':'none';if(!isCake)fMonth.checked=false}
+fCategory.onchange=updateMonthCheck;
+function updatePreview(src){imagePreview.innerHTML=src?`<img src="${esc(src)}" alt="Aperçu">`:'<span>Aperçu de la photo</span>'}
+fImage.onchange=async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;pendingImage=await compressImage(file);updatePreview(pendingImage)};
+function compressImage(file){return new Promise((resolve,reject)=>{const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>{const max=1200,scale=Math.min(1,max/Math.max(im.width,im.height)),w=Math.round(im.width*scale),h=Math.round(im.height*scale),c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.drawImage(im,0,0,w,h);resolve(c.toDataURL('image/jpeg',.84))};im.onerror=reject;im.src=fr.result};fr.onerror=reject;fr.readAsDataURL(file)})}
+
+saveProduct.onclick=()=>{const name=fName.value.trim(),price=Number(fPrice.value);if(!name){toast('Ajoutez un nom de produit.');return}if(!price||price<0){toast('Ajoutez un prix valide.');return}const base={category:fCategory.value,name,description:fDescription.value.trim(),price,order:Number(fOrder.value)||products.length+1,image:fImagePath.value.trim(),active:fActive.checked,isNew:fNew.checked,isMonth:fCategory.value==='cake'&&fMonth.checked,updated:Date.now()};if(pendingImage)base.imageData=pendingImage;if(base.isMonth)products.forEach(p=>p.isMonth=false);if(editingId){const i=products.findIndex(p=>p.id===editingId);const old=products[i];products[i]={...old,...base};if(!pendingImage&&old.imageData)products[i].imageData=old.imageData}else products.push({id:id(),...base});persist();hideProductModal();toast('Produit enregistré.')}
+function toggleActive(pid){const p=products.find(x=>x.id===pid);if(!p)return;p.active=!p.active;p.updated=Date.now();persist();toast(p.active?'Produit réactivé.':'Produit masqué.')}
+function duplicateProduct(pid){const p=products.find(x=>x.id===pid);if(!p)return;const cp=clone(p);cp.id=id();cp.name+=' — copie';cp.isMonth=false;cp.order=products.length+1;cp.updated=Date.now();products.push(cp);persist();toast('Produit dupliqué.')}
+function quickDelete(pid){const p=products.find(x=>x.id===pid);if(!p)return;if(confirm(`Supprimer définitivement « ${p.name} » ?`)){products=products.filter(x=>x.id!==pid);persist();toast('Produit supprimé.')}}
+deleteProduct.onclick=()=>{if(!editingId)return;quickDelete(editingId);hideProductModal()}
+
+addBtn.onclick=()=>openAdd('cake',false);addNewBtn.onclick=()=>openAdd('cake',true);addSnackBtn.onclick=()=>openAdd('snack',true);closeModal.onclick=cancelModal.onclick=hideProductModal;productModal.onclick=e=>{if(e.target===productModal)hideProductModal()}
+
+changeMonthBtn.onclick=()=>{const cakes=products.filter(p=>p.category==='cake');monthSelect.innerHTML=cakes.map(p=>`<option value="${p.id}" ${p.isMonth?'selected':''}>${esc(p.name)} — ${fmtPrice(p.price)}</option>`).join('');monthModal.classList.add('show')};document.querySelectorAll('[data-close-month]').forEach(b=>b.onclick=()=>monthModal.classList.remove('show'));saveMonth.onclick=()=>{products.forEach(p=>p.isMonth=p.id===monthSelect.value);persist();monthModal.classList.remove('show');toast('Cake du mois mis à jour.')}
+
+exportBtn.onclick=()=>{const blob=new Blob([JSON.stringify({version:2,exportedAt:new Date().toISOString(),products},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='cake-lab-admin-sauvegarde.json';a.click();URL.revokeObjectURL(a.href);toast('Sauvegarde téléchargée.')};
+importBtn.onclick=()=>importFile.click();importFile.onchange=e=>{const file=e.target.files[0];if(!file)return;const fr=new FileReader();fr.onload=()=>{try{const data=JSON.parse(fr.result);const arr=Array.isArray(data)?data:data.products;if(!Array.isArray(arr))throw 0;if(confirm('Remplacer le catalogue local par cette sauvegarde ?')){products=arr;persist();toast('Sauvegarde importée.')}}catch(err){toast('Fichier de sauvegarde invalide.')}};fr.readAsText(file);e.target.value=''};
+
+lockBtn.onclick=()=>{sessionStorage.removeItem(LOCK_KEY);lockScreen.classList.add('show');unlockCode.value=''};unlockBtn.onclick=()=>{if(unlockCode.value===LOCAL_CODE){sessionStorage.setItem(LOCK_KEY,'1');lockScreen.classList.remove('show');toast('Administration ouverte.')}else toast('Code incorrect.')};unlockCode.onkeydown=e=>{if(e.key==='Enter')unlockBtn.click()};
+// L'écran est laissé ouvert au premier lancement pour faciliter la prévisualisation.
+// La vraie sécurité sera assurée par Supabase Auth.
+
+renderAll();
+</script>
+</body>
+</html>
