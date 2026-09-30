@@ -53,8 +53,8 @@ button{cursor:pointer}
       <button class="navbtn" data-view="snacks"><span class="navico">◫</span>Snacks & biscuits</button>
     </nav>
     <div class="side-bottom">
-      <div class="sync"><span class="dot"></span><b>Mode local</b><br>Interface prête. Connexion Supabase à faire avant publication réelle.</div>
-      <button class="logout" type="button" id="lockBtn">Verrouiller l’écran</button>
+      <div class="sync" id="syncBox"><span class="dot" id="syncDot"></span><b id="syncTitle">Connexion…</b><br><span id="syncText">Vérification de Supabase.</span></div>
+      <button class="logout" type="button" id="lockBtn">Se déconnecter</button>
     </div>
   </aside>
 
@@ -68,7 +68,7 @@ button{cursor:pointer}
       </div>
     </div>
 
-    <div class="notice"><div>⚠️</div><div><b>Le site public reste verrouillé.</b> Cette administration fonctionne pour l’instant en mode local. Elle ne changera rien sur <b>cake-lab.pages.dev</b> tant qu’on n’aura pas connecté Supabase et validé ensemble la synchronisation.</div></div>
+    <div class="notice" id="publicNotice"><div>🔒</div><div><b>Le site public reste verrouillé.</b> L’administration peut maintenant enregistrer les produits dans Supabase, mais le site public ne lira pas encore ces données tant que nous n’aurons pas volontairement activé la synchronisation.</div></div>
 
     <section class="stats" id="stats">
       <div class="stat"><div class="value" id="statTotal">0</div><div class="label">Produits</div><div class="mini">Toutes catégories</div></div>
@@ -152,19 +152,40 @@ button{cursor:pointer}
 <input type="file" id="importFile" accept="application/json" hidden>
 <div class="toast" id="toast"></div>
 
-<div class="login-cover" id="lockScreen">
+<div class="login-cover show" id="lockScreen">
   <div class="login-box">
-    <div class="login-brand">CAKE LAB ♡</div><div class="login-sub">ADMINISTRATION</div>
-    <div class="field"><label>Code local de prévisualisation</label><input id="unlockCode" type="password" placeholder="Entrez votre code"></div>
-    <button class="btn primary" id="unlockBtn" style="width:100%;margin-top:4px">Ouvrir l’administration</button>
-    <div class="login-note">Ce verrou est seulement une protection locale de prévisualisation. La vraie connexion sécurisée sera faite avec Supabase Auth avant mise en ligne de l’administration.</div>
+    <div class="login-brand">CAKE LAB ♡</div><div class="login-sub">ADMINISTRATION SÉCURISÉE</div>
+
+    <div id="setupPanel" style="display:none">
+      <div style="font-weight:900;margin-bottom:8px">1. Connecter Supabase</div>
+      <div class="field"><label>URL du projet Supabase</label><input id="cfgUrl" type="url" placeholder="https://xxxxx.supabase.co" autocomplete="off"></div>
+      <div class="field"><label>Clé publique anon / publishable</label><textarea id="cfgKey" style="min-height:82px" placeholder="Collez la clé publique Supabase"></textarea></div>
+      <button class="btn primary" id="saveConfigBtn" style="width:100%;margin-top:4px">Enregistrer la connexion</button>
+      <div class="login-note">Ces informations sont la configuration publique normale d’une application Supabase. La sécurité des modifications est assurée par la connexion admin et les règles RLS de la base.</div>
+    </div>
+
+    <div id="loginPanel" style="display:none">
+      <div style="font-weight:900;margin-bottom:8px">Connexion administrateur</div>
+      <div class="field"><label>Email</label><input id="loginEmail" type="email" placeholder="votre@email.com" autocomplete="username"></div>
+      <div class="field"><label>Mot de passe</label><input id="loginPassword" type="password" placeholder="Votre mot de passe" autocomplete="current-password"></div>
+      <button class="btn primary" id="loginBtn" style="width:100%;margin-top:4px">Se connecter</button>
+      <button class="btn" id="changeConfigBtn" style="width:100%;margin-top:8px">Changer la configuration Supabase</button>
+      <div class="login-note">Aucun bouton d’inscription n’est proposé ici. Le compte administrateur est créé directement dans Supabase.</div>
+    </div>
+
+    <div id="loadingPanel" style="text-align:center;padding:12px 0">Connexion à Supabase…</div>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const STORAGE_KEY='cakeLabAdminV2';
-const LOCK_KEY='cakeLabAdminUnlocked';
-const LOCAL_CODE='2580'; // simple verrou de prévisualisation, pas une sécurité serveur
+const CONFIG_KEY='cakeLabSupabaseConfigV1';
+const DEFAULT_SUPABASE_URL='https://mjcoidbfmzlqxvrnyayd.supabase.co';
+const DEFAULT_SUPABASE_KEY='sb_publishable_DcjUuH5aWrkAcXTw-02xZg_wZfd9wy3';
+const BUCKET='product-images';
+let sb=null, currentUser=null, products=[];
+let activeView='dashboard', filter='all', search='', sort='order', editingId=null;
+let pendingFile=null, pendingPreview='';
 
 const seed=[
 {id:'chocolat',category:'cake',name:'Cake Chocolat',description:'Chocolat intense et ultra moelleux.',price:10000,image:'cl-chocolat.webp',active:true,isNew:false,isMonth:false,order:1},
@@ -180,82 +201,108 @@ const seed=[
 {id:'exotique',category:'box',name:'Box Exotique',description:'4 mini cakes : Citron, Mangue Vanille, Coco et Vanille.',price:12000,image:'cl-box-exotique.webp',active:true,isNew:false,isMonth:false,order:11}
 ];
 
-let products=loadProducts();
-let activeView='dashboard', filter='all', search='', sort='order', editingId=null, pendingImage='';
-
 function clone(x){return JSON.parse(JSON.stringify(x))}
-function loadProducts(){try{const v=JSON.parse(localStorage.getItem(STORAGE_KEY));return Array.isArray(v)&&v.length?v:clone(seed)}catch(e){return clone(seed)}}
-function persist(){localStorage.setItem(STORAGE_KEY,JSON.stringify(products));renderAll()}
 function fmtPrice(n){return new Intl.NumberFormat('fr-FR').format(Number(n||0))+' F'}
 function catLabel(c){return c==='cake'?'Cake':c==='box'?'Box':'Snack / biscuit'}
 function esc(s=''){return String(s).replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]))}
-function id(){return 'p_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7)}
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),2200)}
-function imgSrc(p){return p.imageData||p.image||''}
+function newId(){return 'p_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7)}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),2600)}
+function imgSrc(p){return p.imageUrl||p.image||''}
+function setSync(ok,title,text){syncTitle.textContent=title;syncText.textContent=text;syncDot.style.background=ok?'#63d98a':'#f1b94f'}
+function setBusy(btn,busy,label='Enregistrer'){if(!btn)return;btn.disabled=busy;btn.dataset.old=btn.dataset.old||btn.textContent;btn.textContent=busy?'Patientez…':(btn.dataset.old||label)}
+
+function dbRow(p){return {id:p.id,category:p.category,name:p.name,description:p.description||'',price:Number(p.price||0),image_path:p.image||null,image_url:p.imageUrl||null,active:p.active!==false,is_new:!!p.isNew,is_month:!!p.isMonth,sort_order:Number(p.order||999),updated_at:new Date().toISOString()}}
+function appRow(r){return {id:r.id,category:r.category,name:r.name,description:r.description||'',price:Number(r.price||0),image:r.image_path||'',imageUrl:r.image_url||'',active:r.active!==false,isNew:!!r.is_new,isMonth:!!r.is_month,order:Number(r.sort_order||999),updated:r.updated_at?Date.parse(r.updated_at):0}}
 
 function card(p){
  const src=imgSrc(p);
  const pills=[p.isMonth?'<span class="pill month">Cake du mois</span>':'',p.isNew?'<span class="pill new">Nouveauté</span>':'',!p.active?'<span class="pill off">Masqué</span>':''].filter(Boolean).join('');
- return `<article class="product">
-   <div class="thumb">${src?`<img src="${esc(src)}" alt="${esc(p.name)}">`:'<div class="thumb-empty">🍰</div>'}</div>
-   <div class="statusline"><div>${pills}</div><span class="pill">${esc(catLabel(p.category))}</span></div>
-   <div class="product-body"><div class="line"><div><div class="pname">${esc(p.name)}</div><div class="cat">${esc(catLabel(p.category))}</div></div><div class="pprice">${fmtPrice(p.price)}</div></div>
-   <div class="pdesc">${esc(p.description||'Aucune description')}</div>
-   <div class="card-actions"><button class="smallbtn" onclick="openEdit('${p.id}')">Modifier</button><button class="smallbtn" onclick="toggleActive('${p.id}')">${p.active?'Masquer':'Réactiver'}</button><button class="smallbtn" onclick="duplicateProduct('${p.id}')">Dupliquer</button><button class="smallbtn red" onclick="quickDelete('${p.id}')">Supprimer</button></div></div>
- </article>`
+ return `<article class="product"><div class="thumb">${src?`<img src="${esc(src)}" alt="${esc(p.name)}">`:'<div class="thumb-empty">🍰</div>'}</div><div class="statusline"><div>${pills}</div><span class="pill">${esc(catLabel(p.category))}</span></div><div class="product-body"><div class="line"><div><div class="pname">${esc(p.name)}</div><div class="cat">${esc(catLabel(p.category))}</div></div><div class="pprice">${fmtPrice(p.price)}</div></div><div class="pdesc">${esc(p.description||'Aucune description')}</div><div class="card-actions"><button class="smallbtn" onclick="openEdit('${p.id}')">Modifier</button><button class="smallbtn" onclick="toggleActive('${p.id}')">${p.active?'Masquer':'Réactiver'}</button><button class="smallbtn" onclick="duplicateProduct('${p.id}')">Dupliquer</button><button class="smallbtn red" onclick="quickDelete('${p.id}')">Supprimer</button></div></div></article>`
 }
-
-function filteredProducts(){let arr=[...products]; if(filter==='hidden') arr=arr.filter(p=>!p.active); else if(filter!=='all') arr=arr.filter(p=>p.category===filter); if(search) arr=arr.filter(p=>(p.name+' '+p.description).toLowerCase().includes(search.toLowerCase())); if(sort==='name')arr.sort((a,b)=>a.name.localeCompare(b.name,'fr')); else if(sort==='priceAsc')arr.sort((a,b)=>a.price-b.price); else if(sort==='priceDesc')arr.sort((a,b)=>b.price-a.price); else arr.sort((a,b)=>(a.order||999)-(b.order||999)); return arr}
-
-function renderStats(){
- document.getElementById('statTotal').textContent=products.length;
- document.getElementById('statOnline').textContent=products.filter(p=>p.active).length;
- document.getElementById('statHidden').textContent=products.filter(p=>!p.active).length;
- document.getElementById('statNew').textContent=products.filter(p=>p.isNew).length;
- document.getElementById('statSnack').textContent=products.filter(p=>p.category==='snack').length;
-}
-function renderProducts(){const arr=filteredProducts();document.getElementById('productGrid').innerHTML=arr.length?arr.map(card).join(''):'<div class="empty">Aucun produit dans cette sélection.</div>'}
-function renderRecent(){const arr=[...products].sort((a,b)=>(b.updated||0)-(a.updated||0)||a.order-b.order).slice(0,3);document.getElementById('recentGrid').innerHTML=arr.map(card).join('')}
-function renderMonth(){const p=products.find(x=>x.isMonth); const html=p?`<div class="month-card"><div class="month-hero">${imgSrc(p)?`<img src="${esc(imgSrc(p))}" alt="">`:''}</div><div class="month-body"><div class="month-title">${esc(p.name)}</div><div class="month-desc">${esc(p.description)}</div><div class="month-price">${fmtPrice(p.price)}</div></div></div>`:'<div class="empty">Aucun Cake du mois défini.</div>'; document.getElementById('monthCurrent').innerHTML=html; document.getElementById('dashboardMonth').innerHTML=html}
-function renderNew(){const arr=products.filter(p=>p.isNew);document.getElementById('newGrid').innerHTML=arr.length?arr.map(card).join(''):'<div class="new-empty">Aucune nouveauté pour le moment.</div>'}
-function renderSnacks(){const arr=products.filter(p=>p.category==='snack');document.getElementById('snackGrid').innerHTML=arr.length?arr.map(card).join(''):'<div class="new-empty">Aucun snack pour le moment. La catégorie est prête quand vous voudrez commencer.</div>'}
+function filteredProducts(){let arr=[...products];if(filter==='hidden')arr=arr.filter(p=>!p.active);else if(filter!=='all')arr=arr.filter(p=>p.category===filter);if(search)arr=arr.filter(p=>(p.name+' '+p.description).toLowerCase().includes(search.toLowerCase()));if(sort==='name')arr.sort((a,b)=>a.name.localeCompare(b.name,'fr'));else if(sort==='priceAsc')arr.sort((a,b)=>a.price-b.price);else if(sort==='priceDesc')arr.sort((a,b)=>b.price-a.price);else arr.sort((a,b)=>(a.order||999)-(b.order||999));return arr}
+function renderStats(){statTotal.textContent=products.length;statOnline.textContent=products.filter(p=>p.active).length;statHidden.textContent=products.filter(p=>!p.active).length;statNew.textContent=products.filter(p=>p.isNew).length;statSnack.textContent=products.filter(p=>p.category==='snack').length}
+function renderProducts(){const arr=filteredProducts();productGrid.innerHTML=arr.length?arr.map(card).join(''):'<div class="empty">Aucun produit dans cette sélection.</div>'}
+function renderRecent(){const arr=[...products].sort((a,b)=>(b.updated||0)-(a.updated||0)||a.order-b.order).slice(0,3);recentGrid.innerHTML=arr.map(card).join('')}
+function renderMonth(){const p=products.find(x=>x.isMonth);const html=p?`<div class="month-card"><div class="month-hero">${imgSrc(p)?`<img src="${esc(imgSrc(p))}" alt="">`:''}</div><div class="month-body"><div class="month-title">${esc(p.name)}</div><div class="month-desc">${esc(p.description)}</div><div class="month-price">${fmtPrice(p.price)}</div></div></div>`:'<div class="empty">Aucun Cake du mois défini.</div>';monthCurrent.innerHTML=html;dashboardMonth.innerHTML=html}
+function renderNew(){const arr=products.filter(p=>p.isNew);newGrid.innerHTML=arr.length?arr.map(card).join(''):'<div class="new-empty">Aucune nouveauté pour le moment.</div>'}
+function renderSnacks(){const arr=products.filter(p=>p.category==='snack');snackGrid.innerHTML=arr.length?arr.map(card).join(''):'<div class="new-empty">Aucun snack pour le moment. La catégorie est prête quand vous voudrez commencer.</div>'}
 function renderAll(){renderStats();renderProducts();renderRecent();renderMonth();renderNew();renderSnacks()}
 
-function switchView(v){activeView=v;document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+v));document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active',x.dataset.view===v));const titles={dashboard:['Tableau de bord','Gérez le catalogue Cake Lab sans modifier la mise en page du site public.'],products:['Produits','Ajoutez, modifiez, masquez ou supprimez des produits.'],month:['Cake du mois','Changez facilement le produit mis en avant chaque mois.'],new:['Nouveautés','Choisissez les produits à mettre en avant comme nouveautés.'],snacks:['Snacks & biscuits','Préparez vos futures boîtes de biscuits et snacks.']};document.querySelector('.title h1').textContent=titles[v][0];document.getElementById('subtitle').textContent=titles[v][1];window.scrollTo({top:0,behavior:'smooth'})}
+async function loadRemote(){
+ const {data,error}=await sb.from('products').select('*').order('sort_order',{ascending:true});
+ if(error)throw error;
+ if(!data.length){
+   const rows=seed.map(dbRow);
+   const ins=await sb.from('products').insert(rows);
+   if(ins.error)throw ins.error;
+   products=clone(seed);
+ }else products=data.map(appRow);
+ renderAll();
+}
+async function requireAdmin(){
+ const {data,error}=await sb.rpc('is_cake_lab_admin');
+ if(error)throw error;
+ if(data!==true)throw new Error('Ce compte n’est pas autorisé comme administrateur Cake Lab.');
+}
 
-document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>switchView(b.dataset.view));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>switchView(b.dataset.go));
-document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{filter=b.dataset.filter;document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('active',x===b));renderProducts()});
-document.getElementById('searchInput').oninput=e=>{search=e.target.value;renderProducts()};document.getElementById('sortSelect').onchange=e=>{sort=e.target.value;renderProducts()};
+function switchView(v){activeView=v;document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+v));document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active',x.dataset.view===v));const titles={dashboard:['Tableau de bord','Gérez le catalogue Cake Lab sans modifier la mise en page du site public.'],products:['Produits','Ajoutez, modifiez, masquez ou supprimez des produits.'],month:['Cake du mois','Changez facilement le produit mis en avant chaque mois.'],new:['Nouveautés','Choisissez les produits à mettre en avant comme nouveautés.'],snacks:['Snacks & biscuits','Préparez vos futures boîtes de biscuits et snacks.']};document.querySelector('.title h1').textContent=titles[v][0];subtitle.textContent=titles[v][1];window.scrollTo({top:0,behavior:'smooth'})}
+document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>switchView(b.dataset.view));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>switchView(b.dataset.go));document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{filter=b.dataset.filter;document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('active',x===b));renderProducts()});searchInput.oninput=e=>{search=e.target.value;renderProducts()};sortSelect.onchange=e=>{sort=e.target.value;renderProducts()};
 
-function openAdd(category='cake',markNew=false){editingId=null;pendingImage='';document.getElementById('modalTitle').textContent='Ajouter un produit';document.getElementById('dangerZone').style.display='none';fillForm({category,price:10000,name:'',description:'',order:products.length+1,image:'',active:true,isNew:markNew,isMonth:false});showProductModal()}
-function openEdit(pid){const p=products.find(x=>x.id===pid);if(!p)return;editingId=pid;pendingImage=p.imageData||'';document.getElementById('modalTitle').textContent='Modifier le produit';document.getElementById('dangerZone').style.display='block';fillForm(p);showProductModal()}
-function fillForm(p){fCategory.value=p.category||'cake';fPrice.value=p.price||'';fName.value=p.name||'';fDescription.value=p.description||'';fOrder.value=p.order||'';fImagePath.value=p.image||'';fActive.checked=p.active!==false;fNew.checked=!!p.isNew;fMonth.checked=!!p.isMonth;fImage.value='';updateMonthCheck();updatePreview(p.imageData||p.image||'')}
+function openAdd(category='cake',markNew=false){editingId=null;pendingFile=null;pendingPreview='';modalTitle.textContent='Ajouter un produit';dangerZone.style.display='none';fillForm({category,price:10000,name:'',description:'',order:products.length+1,image:'',imageUrl:'',active:true,isNew:markNew,isMonth:false});showProductModal()}
+function openEdit(pid){const p=products.find(x=>x.id===pid);if(!p)return;editingId=pid;pendingFile=null;pendingPreview='';modalTitle.textContent='Modifier le produit';dangerZone.style.display='block';fillForm(p);showProductModal()}
+function fillForm(p){fCategory.value=p.category||'cake';fPrice.value=p.price||'';fName.value=p.name||'';fDescription.value=p.description||'';fOrder.value=p.order||'';fImagePath.value=p.imageUrl||p.image||'';fActive.checked=p.active!==false;fNew.checked=!!p.isNew;fMonth.checked=!!p.isMonth;fImage.value='';updateMonthCheck();updatePreview(imgSrc(p))}
 function showProductModal(){productModal.classList.add('show')}
 function hideProductModal(){productModal.classList.remove('show')}
 function updateMonthCheck(){const isCake=fCategory.value==='cake';monthCheckLabel.style.display=isCake?'flex':'none';if(!isCake)fMonth.checked=false}
 fCategory.onchange=updateMonthCheck;
 function updatePreview(src){imagePreview.innerHTML=src?`<img src="${esc(src)}" alt="Aperçu">`:'<span>Aperçu de la photo</span>'}
-fImage.onchange=async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;pendingImage=await compressImage(file);updatePreview(pendingImage)};
-function compressImage(file){return new Promise((resolve,reject)=>{const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>{const max=1200,scale=Math.min(1,max/Math.max(im.width,im.height)),w=Math.round(im.width*scale),h=Math.round(im.height*scale),c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.drawImage(im,0,0,w,h);resolve(c.toDataURL('image/jpeg',.84))};im.onerror=reject;im.src=fr.result};fr.onerror=reject;fr.readAsDataURL(file)})}
+fImage.onchange=e=>{const file=e.target.files&&e.target.files[0];if(!file)return;pendingFile=file;if(pendingPreview)URL.revokeObjectURL(pendingPreview);pendingPreview=URL.createObjectURL(file);updatePreview(pendingPreview)};
 
-saveProduct.onclick=()=>{const name=fName.value.trim(),price=Number(fPrice.value);if(!name){toast('Ajoutez un nom de produit.');return}if(!price||price<0){toast('Ajoutez un prix valide.');return}const base={category:fCategory.value,name,description:fDescription.value.trim(),price,order:Number(fOrder.value)||products.length+1,image:fImagePath.value.trim(),active:fActive.checked,isNew:fNew.checked,isMonth:fCategory.value==='cake'&&fMonth.checked,updated:Date.now()};if(pendingImage)base.imageData=pendingImage;if(base.isMonth)products.forEach(p=>p.isMonth=false);if(editingId){const i=products.findIndex(p=>p.id===editingId);const old=products[i];products[i]={...old,...base};if(!pendingImage&&old.imageData)products[i].imageData=old.imageData}else products.push({id:id(),...base});persist();hideProductModal();toast('Produit enregistré.')}
-function toggleActive(pid){const p=products.find(x=>x.id===pid);if(!p)return;p.active=!p.active;p.updated=Date.now();persist();toast(p.active?'Produit réactivé.':'Produit masqué.')}
-function duplicateProduct(pid){const p=products.find(x=>x.id===pid);if(!p)return;const cp=clone(p);cp.id=id();cp.name+=' — copie';cp.isMonth=false;cp.order=products.length+1;cp.updated=Date.now();products.push(cp);persist();toast('Produit dupliqué.')}
-function quickDelete(pid){const p=products.find(x=>x.id===pid);if(!p)return;if(confirm(`Supprimer définitivement « ${p.name} » ?`)){products=products.filter(x=>x.id!==pid);persist();toast('Produit supprimé.')}}
-deleteProduct.onclick=()=>{if(!editingId)return;quickDelete(editingId);hideProductModal()}
+async function optimizeImage(file){return await new Promise((resolve,reject)=>{const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>{const max=1600,scale=Math.min(1,max/Math.max(im.width,im.height)),w=Math.round(im.width*scale),h=Math.round(im.height*scale),c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(im,0,0,w,h);c.toBlob(b=>b?resolve(b):reject(new Error('Compression impossible')),'image/webp',.84)};im.onerror=reject;im.src=fr.result};fr.onerror=reject;fr.readAsDataURL(file)})}
+async function uploadImage(file,pid){const blob=await optimizeImage(file);const path=`${pid}/${Date.now()}.webp`;const {error}=await sb.storage.from(BUCKET).upload(path,blob,{contentType:'image/webp',upsert:false,cacheControl:'3600'});if(error)throw error;const {data}=sb.storage.from(BUCKET).getPublicUrl(path);return {path,publicUrl:data.publicUrl}}
 
-addBtn.onclick=()=>openAdd('cake',false);addNewBtn.onclick=()=>openAdd('cake',true);addSnackBtn.onclick=()=>openAdd('snack',true);closeModal.onclick=cancelModal.onclick=hideProductModal;productModal.onclick=e=>{if(e.target===productModal)hideProductModal()}
+saveProduct.onclick=async()=>{
+ const name=fName.value.trim(),price=Number(fPrice.value);if(!name){toast('Ajoutez un nom de produit.');return}if(Number.isNaN(price)||price<0){toast('Ajoutez un prix valide.');return}
+ setBusy(saveProduct,true);
+ try{
+   const pid=editingId||newId();
+   let old=editingId?products.find(p=>p.id===editingId):null;
+   let image=old?.image||'', imageUrl=old?.imageUrl||'';
+   const typed=fImagePath.value.trim();
+   if(typed && typed!==imageUrl && typed!==image){ if(/^https?:\/\//i.test(typed)) imageUrl=typed; else image=typed }
+   if(pendingFile){const up=await uploadImage(pendingFile,pid);imageUrl=up.publicUrl;image=''}
+   const p={id:pid,category:fCategory.value,name,description:fDescription.value.trim(),price,order:Number(fOrder.value)||products.length+1,image,imageUrl,active:fActive.checked,isNew:fNew.checked,isMonth:fCategory.value==='cake'&&fMonth.checked,updated:Date.now()};
+   if(p.isMonth){const clr=await sb.from('products').update({is_month:false}).eq('is_month',true);if(clr.error)throw clr.error}
+   const {error}=await sb.from('products').upsert(dbRow(p));if(error)throw error;
+   await loadRemote();hideProductModal();toast('Produit enregistré dans Supabase.');
+ }catch(e){console.error(e);toast(e.message||'Erreur pendant l’enregistrement.')}finally{setBusy(saveProduct,false)}
+}
+async function toggleActive(pid){const p=products.find(x=>x.id===pid);if(!p)return;const {error}=await sb.from('products').update({active:!p.active,updated_at:new Date().toISOString()}).eq('id',pid);if(error){toast(error.message);return}await loadRemote();toast(!p.active?'Produit réactivé.':'Produit masqué.')}
+async function duplicateProduct(pid){const p=products.find(x=>x.id===pid);if(!p)return;const cp={...clone(p),id:newId(),name:p.name+' — copie',isMonth:false,order:products.length+1,updated:Date.now()};const {error}=await sb.from('products').insert(dbRow(cp));if(error){toast(error.message);return}await loadRemote();toast('Produit dupliqué.')}
+async function quickDelete(pid){const p=products.find(x=>x.id===pid);if(!p)return;if(!confirm(`Supprimer définitivement « ${p.name} » ?`))return;const {error}=await sb.from('products').delete().eq('id',pid);if(error){toast(error.message);return}await loadRemote();toast('Produit supprimé.')}
+deleteProduct.onclick=async()=>{if(!editingId)return;await quickDelete(editingId);hideProductModal()};
+addBtn.onclick=()=>openAdd('cake',false);addNewBtn.onclick=()=>openAdd('cake',true);addSnackBtn.onclick=()=>openAdd('snack',true);closeModal.onclick=cancelModal.onclick=hideProductModal;productModal.onclick=e=>{if(e.target===productModal)hideProductModal()};
 
-changeMonthBtn.onclick=()=>{const cakes=products.filter(p=>p.category==='cake');monthSelect.innerHTML=cakes.map(p=>`<option value="${p.id}" ${p.isMonth?'selected':''}>${esc(p.name)} — ${fmtPrice(p.price)}</option>`).join('');monthModal.classList.add('show')};document.querySelectorAll('[data-close-month]').forEach(b=>b.onclick=()=>monthModal.classList.remove('show'));saveMonth.onclick=()=>{products.forEach(p=>p.isMonth=p.id===monthSelect.value);persist();monthModal.classList.remove('show');toast('Cake du mois mis à jour.')}
+changeMonthBtn.onclick=()=>{const cakes=products.filter(p=>p.category==='cake');monthSelect.innerHTML=cakes.map(p=>`<option value="${p.id}" ${p.isMonth?'selected':''}>${esc(p.name)} — ${fmtPrice(p.price)}</option>`).join('');monthModal.classList.add('show')};document.querySelectorAll('[data-close-month]').forEach(b=>b.onclick=()=>monthModal.classList.remove('show'));saveMonth.onclick=async()=>{try{const a=await sb.from('products').update({is_month:false}).eq('is_month',true);if(a.error)throw a.error;const b=await sb.from('products').update({is_month:true,updated_at:new Date().toISOString()}).eq('id',monthSelect.value);if(b.error)throw b.error;await loadRemote();monthModal.classList.remove('show');toast('Cake du mois mis à jour dans Supabase.')}catch(e){toast(e.message)}};
 
-exportBtn.onclick=()=>{const blob=new Blob([JSON.stringify({version:2,exportedAt:new Date().toISOString(),products},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='cake-lab-admin-sauvegarde.json';a.click();URL.revokeObjectURL(a.href);toast('Sauvegarde téléchargée.')};
-importBtn.onclick=()=>importFile.click();importFile.onchange=e=>{const file=e.target.files[0];if(!file)return;const fr=new FileReader();fr.onload=()=>{try{const data=JSON.parse(fr.result);const arr=Array.isArray(data)?data:data.products;if(!Array.isArray(arr))throw 0;if(confirm('Remplacer le catalogue local par cette sauvegarde ?')){products=arr;persist();toast('Sauvegarde importée.')}}catch(err){toast('Fichier de sauvegarde invalide.')}};fr.readAsText(file);e.target.value=''};
+exportBtn.onclick=()=>{const blob=new Blob([JSON.stringify({version:3,exportedAt:new Date().toISOString(),products},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='cake-lab-admin-sauvegarde.json';a.click();URL.revokeObjectURL(a.href);toast('Sauvegarde téléchargée.')};
+importBtn.onclick=()=>importFile.click();importFile.onchange=e=>{const file=e.target.files[0];if(!file)return;const fr=new FileReader();fr.onload=async()=>{try{const data=JSON.parse(fr.result),arr=Array.isArray(data)?data:data.products;if(!Array.isArray(arr))throw new Error('Fichier invalide');if(confirm('Importer cette sauvegarde dans Supabase ?')){const rows=arr.map(dbRow);const {error}=await sb.from('products').upsert(rows);if(error)throw error;await loadRemote();toast('Sauvegarde importée dans Supabase.')}}catch(err){toast(err.message||'Fichier invalide.')}};fr.readAsText(file);e.target.value=''};
 
-lockBtn.onclick=()=>{sessionStorage.removeItem(LOCK_KEY);lockScreen.classList.add('show');unlockCode.value=''};unlockBtn.onclick=()=>{if(unlockCode.value===LOCAL_CODE){sessionStorage.setItem(LOCK_KEY,'1');lockScreen.classList.remove('show');toast('Administration ouverte.')}else toast('Code incorrect.')};unlockCode.onkeydown=e=>{if(e.key==='Enter')unlockBtn.click()};
-// L'écran est laissé ouvert au premier lancement pour faciliter la prévisualisation.
-// La vraie sécurité sera assurée par Supabase Auth.
+function getCfg(){try{const saved=JSON.parse(localStorage.getItem(CONFIG_KEY)||'null');return saved?.url&&saved?.key?saved:{url:DEFAULT_SUPABASE_URL,key:DEFAULT_SUPABASE_KEY}}catch(e){return {url:DEFAULT_SUPABASE_URL,key:DEFAULT_SUPABASE_KEY}}}
+function setCfg(url,key){localStorage.setItem(CONFIG_KEY,JSON.stringify({url:url.trim(),key:key.trim()}))}
+function showSetup(){loadingPanel.style.display='none';loginPanel.style.display='none';setupPanel.style.display='block';lockScreen.classList.add('show');const c=getCfg();cfgUrl.value=c?.url||DEFAULT_SUPABASE_URL;cfgKey.value=c?.key||DEFAULT_SUPABASE_KEY}
+function showLogin(){loadingPanel.style.display='none';setupPanel.style.display='none';loginPanel.style.display='block';lockScreen.classList.add('show')}
+async function connectClient(){const c=getCfg();if(!c?.url||!c?.key){showSetup();return false}try{sb=window.supabase.createClient(c.url,c.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});return true}catch(e){showSetup();toast('Configuration Supabase invalide.');return false}}
+async function openApp(session){currentUser=session.user;await requireAdmin();await loadRemote();lockScreen.classList.remove('show');setSync(true,'Supabase connecté',currentUser.email||'Administrateur');}
+async function boot(){loadingPanel.style.display='block';if(!await connectClient())return;const {data,error}=await sb.auth.getSession();if(error){showLogin();return}if(data.session){try{await openApp(data.session)}catch(e){console.error(e);showLogin();toast(e.message)}}else showLogin();sb.auth.onAuthStateChange(async(event,session)=>{if(event==='SIGNED_OUT'){currentUser=null;setSync(false,'Déconnecté','Connexion nécessaire.');showLogin()}})}
 
-renderAll();
+saveConfigBtn.onclick=async()=>{const u=cfgUrl.value.trim(),k=cfgKey.value.trim();if(!u||!k){toast('Collez l’URL et la clé publique Supabase.');return}setCfg(u,k);location.reload()};
+changeConfigBtn.onclick=()=>showSetup();
+loginBtn.onclick=async()=>{const email=loginEmail.value.trim(),password=loginPassword.value;if(!email||!password){toast('Entrez votre email et votre mot de passe.');return}setBusy(loginBtn,true);try{const {data,error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;await openApp(data.session);toast('Connexion réussie.')}catch(e){console.error(e);toast(e.message||'Connexion impossible.')}finally{setBusy(loginBtn,false)}};
+loginPassword.onkeydown=e=>{if(e.key==='Enter')loginBtn.click()};
+lockBtn.onclick=async()=>{if(sb)await sb.auth.signOut();showLogin()};
+
+boot();
 </script>
 </body>
 </html>
