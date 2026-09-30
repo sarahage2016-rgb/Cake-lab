@@ -1,0 +1,733 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Cake Lab</title><style>
+:root{--brown:#5b210d;--cream:#f7ede4;--ink:#321209;--orange:#db7c00}
+*{box-sizing:border-box} html,body{margin:0;padding:0;background:#f2e7dd;color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+#app{width:min(100vw,520px);margin:0 auto;background:#f7ede4;min-height:100vh;position:relative;box-shadow:0 0 30px rgba(50,20,10,.12)}
+.screen{display:none;position:relative;width:100%}.screen.active{display:block}.art{width:100%;height:auto;display:block}
+.hotspot{position:absolute;border:0;background:transparent;z-index:10;cursor:pointer;-webkit-tap-highlight-color:transparent;color:transparent;padding:0}
+.live-badge{position:absolute;z-index:25;background:#5b210d;color:#fff;font-weight:800;border-radius:999px;width:28px;min-width:28px;height:28px;line-height:28px;text-align:center;font-size:13px;right:7.6%;top:3.45%;padding:0;box-shadow:0 1px 3px rgba(0,0,0,.12);pointer-events:none}
+#home .live-badge{right:4.7%;top:6.0%}#catalog .live-badge{right:10.5%;top:2.85%}#boxes .live-badge{right:5.9%;top:2.65%}#checkout .live-badge{right:2.7%;top:3.15%;width:6.6%;min-width:0;height:auto;aspect-ratio:1;line-height:1;display:flex;align-items:center;justify-content:center;font-size:clamp(10px,3.2vw,15px);box-shadow:none}.live-badge.is-empty{display:none}
+#checkout{background:#f8eee6}.checkout-canvas{position:relative;width:100%}.checkout-canvas>img{display:block;width:100%;height:auto}.order-field{position:absolute;z-index:30;border:0!important;background:transparent!important;color:transparent;font:400 clamp(12px,3.15vw,16px)/1.15 Arial;padding:0 12px!important;outline:none!important;box-shadow:none!important;min-width:0;box-sizing:border-box!important;-webkit-appearance:none;appearance:none;border-radius:11px!important;margin:0!important;transform:none!important;display:block;vertical-align:middle!important}
+.order-field:focus,.order-field.has-value{background:rgba(253,247,242,.98)!important;color:#51382f!important;outline:none!important;box-shadow:none!important;border:0!important;margin:0!important;transform:none!important}
+#lastName{left:10.20%;top:44.98%;width:37.20%;height:3.53%}#firstName{left:51.65%;top:44.98%;width:36.98%;height:3.53%}#phone{left:18.49%;top:51.20%;width:70.14%;height:3.05%}
+#address{left:18.82%;top:63.20%;width:32.35%;height:3.18%}#zone{left:60.68%;top:63.20%;width:28.38%;height:3.18%}#deliveryDate{left:18.82%;top:68.63%;width:32.35%;height:3.18%}#timeSlot{left:60.68%;top:68.63%;width:28.38%;height:3.18%}
+#zone:focus,#zone.has-value,#timeSlot:focus,#timeSlot.has-value{padding-right:30px;background-color:#fdf7f2!important;background-image:linear-gradient(45deg,transparent 50%,#3b2016 50%),linear-gradient(135deg,#3b2016 50%,transparent 50%)!important;background-position:calc(100% - 16px) 50%,calc(100% - 11px) 50%!important;background-size:6px 6px,6px 6px!important;background-repeat:no-repeat!important}
+#zone:not(:focus):not(.has-value),#timeSlot:not(:focus):not(.has-value){background-image:none!important;color:transparent!important}
+#deliveryDate::-webkit-calendar-picker-indicator{opacity:0;position:absolute;inset:0;width:100%;height:100%;cursor:pointer}
+#topper{position:absolute;left:10.95%;top:78.35%;width:4.9%;height:2.7%;z-index:34;opacity:0;margin:0;cursor:pointer}.topper-mark{position:absolute;left:10.95%;top:78.35%;width:4.9%;height:2.7%;z-index:33;display:flex;align-items:center;justify-content:center;color:#6f270e;font:bold clamp(13px,4vw,20px) Arial;pointer-events:none}.topper-mark.hidden{display:none}
+.qty-hit{position:absolute;z-index:34;border:0;background:transparent;color:transparent;cursor:pointer}.qty-minus{left:69.72%;top:33.34%;width:6.92%;height:4.10%}.qty-plus{left:83.55%;top:33.34%;width:6.92%;height:4.10%}.qty-live{position:absolute;z-index:35;left:76.64%;top:33.34%;width:6.92%;height:4.10%;display:flex;align-items:center;justify-content:center;background:#fdf7f2;color:#31130b;font:700 clamp(17px,4.7vw,25px) Georgia,serif;border-radius:4px}.qty-live.is-one{display:none}
+.validate-hit{position:absolute;z-index:35;left:6.7%;top:92.2%;width:86.7%;height:5.0%;border:0;background:transparent;color:transparent;cursor:pointer}
+
+.payment-selector{position:absolute;z-index:58;left:9.15%;top:88.65%;width:81.7%;height:3.70%;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:2.2%;padding:.22% .48%;background:#f6e5da;border-radius:12px;box-shadow:none;box-sizing:border-box;overflow:hidden}
+.pay-choice{border:1px solid rgba(91,33,13,.18);background:#fffaf6;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:1px 3px;min-width:0;min-height:0;height:100%;overflow:hidden;color:#4b2618;font:700 clamp(7px,1.65vw,9px)/1 Arial,Helvetica,sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;box-sizing:border-box;text-align:center}
+.pay-choice .pay-icon{width:12px;height:12px;min-width:12px;min-height:12px;border-radius:4px;display:flex;align-items:center;justify-content:center;background:#fff;overflow:hidden;box-sizing:border-box}
+.pay-choice .pay-icon.cash{font-size:10px;color:#6b2a13;background:#fff7f1}
+.pay-choice .pay-icon img{width:100%;height:100%;object-fit:contain;display:block}
+.pay-choice .pay-label{display:block;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.pay-choice.selected{border:1.4px solid #6b2a13;background:#fffaf6}
+#checkout.layout-douceur .payment-selector{top:88.65%}
+@media(max-width:380px){.payment-selector{left:9.0%;width:82%;gap:2%;padding:.18% .42%}.pay-choice{padding:1px 2px;font-size:7px}.pay-choice .pay-icon{width:11px;height:11px;min-width:11px;min-height:11px}}
+
+.menu-hit{left:6%;top:2.3%;width:10%;height:5.8%}.bag-hit{right:1%!important;top:.5%!important;width:20%!important;height:10%!important;z-index:40!important}.cart-hit{right:0!important;top:0!important;width:20%!important;height:10%!important;z-index:40!important;touch-action:manipulation}
+#checkout .live-badge{display:none!important}.live-badge.is-empty{display:none}
+
+.drawer-bg,.modal-bg{position:fixed;inset:0;background:rgba(30,10,4,.55);z-index:100;display:none}.drawer-bg.open,.modal-bg.open{display:flex}.drawer{width:min(82vw,390px);height:100%;background:#fff9f4;padding:22px 18px;box-shadow:12px 0 30px rgba(0,0,0,.25)}.drawer h2{font:700 26px Georgia,serif;margin:4px 0 20px}.drawer button{width:100%;border:0;background:transparent;border-bottom:1px solid #ead9cf;padding:15px 6px;text-align:left;color:#3d170d;font-size:16px}.close{float:right;border:0!important;background:#f0e2d9!important;width:38px!important;height:38px!important;border-radius:50%;font-size:24px;text-align:center!important;padding:0!important}.modal-bg{align-items:flex-end;justify-content:center}.sheet{width:min(100%,520px);max-height:86vh;overflow:auto;background:#fffaf6;border-radius:24px 24px 0 0;padding:18px 16px 25px;box-shadow:0 -12px 35px rgba(0,0,0,.25)}.sheet h3{font:700 23px Georgia,serif;margin:4px 0 14px}.cart-row{display:grid;grid-template-columns:1fr auto;gap:12px;padding:11px 0;border-bottom:1px solid #ead9cf;font-size:14px}.cart-row.cart-item{grid-template-columns:minmax(0,1fr) auto 42px;align-items:center;gap:10px}.cart-row small{display:block;color:#7a5849;margin-top:4px}.trash-btn{width:38px;height:38px;border:1px solid #ead9cf;border-radius:12px;background:#fff;color:#7a2c16;display:flex;align-items:center;justify-content:center;font-size:19px;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}.trash-btn:active{background:#f7e5db;transform:scale(.97)}.cart-total{display:flex;justify-content:space-between;font-weight:800;font-size:18px;padding:16px 0}.primary,.secondary{width:100%;border-radius:999px;padding:13px 16px;font-weight:800;font-size:14px;margin-top:9px}.primary{border:0;background:#5b210d;color:white}.secondary{border:1px solid #6b2a13;background:white;color:#5b210d}.note{font-size:12px;line-height:1.45;color:#734637;background:#fff0e9;border-radius:12px;padding:10px;margin:10px 0}.toast{position:fixed;z-index:150;left:50%;bottom:18px;transform:translateX(-50%);width:min(90vw,430px);padding:12px 14px;border-radius:14px;background:#351109;color:white;text-align:center;font-size:13px;display:none}.toast.show{display:block}
+
+/* Box Douceur : coordonnées calées exactement sur les cases dessinées du visuel. */
+#checkout.layout-douceur #lastName{left:10.20%!important;top:43.00%!important;width:36.77%!important;height:3.35%!important}
+#checkout.layout-douceur #firstName{left:50.48%!important;top:43.00%!important;width:37.62%!important;height:3.35%!important}
+#checkout.layout-douceur #phone{left:18.28%!important;top:49.82%!important;width:69.82%!important;height:2.81%!important}
+#checkout.layout-douceur #address{left:18.70%!important;top:60.82%!important;width:69.18%!important;height:2.70%!important}
+#checkout.layout-douceur #zone{left:18.70%!important;top:66.15%!important;width:29.45%!important;height:2.70%!important}
+#checkout.layout-douceur #deliveryDate{left:61.10%!important;top:66.15%!important;width:26.88%!important;height:2.70%!important}
+#checkout.layout-douceur #timeSlot{left:18.70%!important;top:71.47%!important;width:69.30%!important;height:2.70%!important;z-index:55!important;cursor:pointer!important;touch-action:manipulation!important}
+#checkout.layout-douceur #timeSlot:focus,#checkout.layout-douceur #timeSlot.has-value{background-position:calc(100% - 19px) 50%,calc(100% - 14px) 50%!important}
+/* Sur Box Douceur, le select natif occupe toute la case : aucun bouton invisible au-dessus. */
+.time-open-hit{position:absolute;z-index:39;left:59.8%;top:68.65%;width:30.5%;height:3.7%;border:0;background:transparent;color:transparent;padding:0;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#checkout.layout-douceur .time-open-hit{display:none!important}
+
+
+/* Affichage stable des informations de livraison : le contrôle natif reste cliquable,
+   mais le texte visible est rendu dans un calque centré dans la case dessinée. */
+#address,#zone,#deliveryDate,#timeSlot{opacity:0!important;z-index:55!important;cursor:pointer!important;touch-action:manipulation!important}
+.field-proxy{position:absolute;z-index:44;display:none;align-items:center;justify-content:center;text-align:center;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;background:rgba(253,247,242,.985);color:#51382f;font:400 clamp(12px,3.15vw,16px)/1 Arial,Helvetica,sans-serif;padding:0 12px;border-radius:11px;pointer-events:none;box-sizing:border-box}
+.field-proxy.visible{display:flex}
+#addressProxy{left:18.82%;top:63.20%;width:32.35%;height:3.18%}
+#zoneProxy{left:60.68%;top:63.20%;width:28.38%;height:3.18%;padding-left:30px;padding-right:30px}
+#deliveryDateProxy{left:18.82%;top:68.63%;width:32.35%;height:3.18%;padding-left:30px;padding-right:30px}
+#timeSlotProxy{left:60.68%;top:68.63%;width:28.38%;height:3.18%;padding-left:30px;padding-right:30px}
+#zoneProxy::after,#deliveryDateProxy::after,#timeSlotProxy::after{content:'⌄';position:absolute;right:10px;top:50%;transform:translateY(-56%);font-size:18px;font-weight:700;color:#3b2016}
+#checkout.layout-douceur #addressProxy{left:18.70%;top:60.82%;width:69.18%;height:2.70%}
+#checkout.layout-douceur #zoneProxy{left:18.70%;top:66.15%;width:29.45%;height:2.70%}
+#checkout.layout-douceur #deliveryDateProxy{left:61.10%;top:66.15%;width:26.88%;height:2.70%}
+#checkout.layout-douceur #timeSlotProxy{left:18.70%;top:71.47%;width:69.30%;height:2.70%}
+#checkout.layout-douceur #zoneProxy,#checkout.layout-douceur #deliveryDateProxy,#checkout.layout-douceur #timeSlotProxy{padding-left:30px;padding-right:30px}
+
+@media(max-width:380px){.order-field{font-size:12px;padding:0 6px}.qty-live{font-size:15px}}
+
+#checkout input.order-field,#checkout select.order-field{vertical-align:middle!important}
+#checkout input.order-field:focus,#checkout select.order-field:focus{position:absolute!important}
+
+/* === Alignement définitif des champs dans les cases dessinées === */
+#lastName,#firstName,#phone,#address,#zone,#deliveryDate,#timeSlot{opacity:0!important;z-index:55!important;cursor:text!important;touch-action:manipulation!important}
+#zone,#deliveryDate,#timeSlot{cursor:pointer!important}
+.field-proxy{position:absolute!important;z-index:44!important;display:none;align-items:center!important;justify-content:center!important;text-align:center!important;overflow:hidden!important;white-space:nowrap!important;text-overflow:ellipsis!important;background:rgba(253,247,242,.995)!important;color:#51382f!important;font-family:Arial,Helvetica,sans-serif!important;font-size:clamp(9px,2.35vw,12px)!important;font-weight:400!important;line-height:1!important;padding:0 8px!important;border-radius:10px!important;pointer-events:none!important;box-sizing:border-box!important}
+.field-proxy.visible{display:flex!important}
+/* Pages cakes + box classiques : coordonnées mesurées sur les vraies cases blanches */
+#lastName,#lastNameProxy{left:10.63%!important;top:46.17%!important;width:37.94%!important;height:3.89%!important}
+#firstName,#firstNameProxy{left:52.18%!important;top:46.17%!important;width:37.30%!important;height:3.89%!important}
+#phone,#phoneProxy{left:18.50%!important;top:52.87%!important;width:69.85%!important;height:3.29%!important}
+#address,#addressProxy{left:18.92%!important;top:64.17%!important;width:33.05%!important;height:3.11%!important}
+#zone,#zoneProxy{left:61.64%!important;top:64.17%!important;width:28.69%!important;height:3.11%!important}
+#deliveryDate,#deliveryDateProxy{left:18.92%!important;top:69.92%!important;width:32.41%!important;height:2.99%!important}
+#timeSlot,#timeSlotProxy{left:61.64%!important;top:69.92%!important;width:28.69%!important;height:3.05%!important}
+#zoneProxy,#deliveryDateProxy,#timeSlotProxy{padding-left:24px!important;padding-right:24px!important}
+#zoneProxy::after,#deliveryDateProxy::after,#timeSlotProxy::after{right:8px!important;font-size:14px!important}
+/* Box Douceur : géométrie spécifique mesurée sur son visuel */
+#checkout.layout-douceur #lastName,#checkout.layout-douceur #lastNameProxy{left:11.05%!important;top:43.54%!important;width:36.34%!important;height:3.47%!important}
+#checkout.layout-douceur #firstName,#checkout.layout-douceur #firstNameProxy{left:52.71%!important;top:43.54%!important;width:36.34%!important;height:3.47%!important}
+#checkout.layout-douceur #phone,#checkout.layout-douceur #phoneProxy{left:18.70%!important;top:50.54%!important;width:70.35%!important;height:2.75%!important}
+#checkout.layout-douceur #address,#checkout.layout-douceur #addressProxy{left:19.02%!important;top:61.78%!important;width:69.93%!important;height:2.57%!important}
+#checkout.layout-douceur #zone,#checkout.layout-douceur #zoneProxy{left:19.02%!important;top:67.17%!important;width:29.44%!important;height:2.51%!important}
+#checkout.layout-douceur #deliveryDate,#checkout.layout-douceur #deliveryDateProxy{left:61.96%!important;top:67.17%!important;width:26.04%!important;height:2.51%!important}
+#checkout.layout-douceur #timeSlot,#checkout.layout-douceur #timeSlotProxy{left:19.02%!important;top:72.43%!important;width:69.93%!important;height:2.45%!important}
+#checkout.layout-douceur #zoneProxy,#checkout.layout-douceur #deliveryDateProxy,#checkout.layout-douceur #timeSlotProxy{padding-left:24px!important;padding-right:24px!important}
+
+
+/* === CORRECTION FINALE : un seul champ visible par case, aucune couche superposée === */
+.field-proxy{display:none!important}
+#lastName,#firstName,#phone,#address,#zone,#deliveryDate,#timeSlot{
+  opacity:1!important; z-index:56!important;
+  background:transparent!important; color:transparent!important;
+  border:0!important; box-shadow:none!important; outline:none!important;
+  padding:0 11px!important; margin:0!important; border-radius:10px!important;
+  font-family:Arial,Helvetica,sans-serif!important;
+  font-size:clamp(10px,2.55vw,13px)!important; font-weight:400!important;
+  line-height:1.1!important; box-sizing:border-box!important;
+  -webkit-appearance:none!important; appearance:none!important;
+}
+#lastName:focus,#firstName:focus,#phone:focus,#address:focus,#zone:focus,#deliveryDate:focus,#timeSlot:focus,
+#lastName.has-value,#firstName.has-value,#phone.has-value,#address.has-value,#zone.has-value,#deliveryDate.has-value,#timeSlot.has-value{
+  background:#fffaf7!important; color:#51382f!important;
+  border:0!important; box-shadow:none!important; outline:none!important;
+}
+#lastName,#firstName,#phone{text-align:left!important}
+#address{text-align:left!important}
+#zone,#deliveryDate,#timeSlot{text-align:center!important;text-align-last:center!important;padding-left:20px!important;padding-right:28px!important}
+#zone:focus,#zone.has-value,#timeSlot:focus,#timeSlot.has-value{
+  background-color:#fffaf7!important;
+  background-image:linear-gradient(45deg,transparent 50%,#3b2016 50%),linear-gradient(135deg,#3b2016 50%,transparent 50%)!important;
+  background-position:calc(100% - 16px) 50%,calc(100% - 11px) 50%!important;
+  background-size:6px 6px,6px 6px!important;background-repeat:no-repeat!important;
+}
+#deliveryDate{padding-right:10px!important}
+#deliveryDate::-webkit-calendar-picker-indicator{opacity:0!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;cursor:pointer!important}
+/* Pages cakes + box standard : coordonnées exactes des rectangles blancs du visuel */
+#lastName{left:10.60%!important;top:44.62%!important;width:37.40%!important;height:3.77%!important}
+#firstName{left:51.50%!important;top:44.62%!important;width:37.40%!important;height:3.77%!important}
+#phone{left:18.20%!important;top:50.96%!important;width:70.30%!important;height:3.17%!important}
+#address{left:18.50%!important;top:62.26%!important;width:32.90%!important;height:3.17%!important}
+#zone{left:60.60%!important;top:62.26%!important;width:28.60%!important;height:3.23%!important}
+#deliveryDate{left:18.50%!important;top:68.00%!important;width:32.20%!important;height:3.05%!important}
+#timeSlot{left:60.60%!important;top:68.00%!important;width:28.60%!important;height:3.05%!important}
+/* Box Douceur : géométrie propre à son visuel */
+#checkout.layout-douceur #lastName{left:10.70%!important;top:43.05%!important;width:36.20%!important;height:3.35%!important}
+#checkout.layout-douceur #firstName{left:51.85%!important;top:43.05%!important;width:36.00%!important;height:3.35%!important}
+#checkout.layout-douceur #phone{left:18.55%!important;top:50.48%!important;width:69.55%!important;height:2.75%!important}
+#checkout.layout-douceur #address{left:18.70%!important;top:60.89%!important;width:69.10%!important;height:2.57%!important}
+#checkout.layout-douceur #zone{left:18.70%!important;top:66.27%!important;width:29.20%!important;height:2.57%!important}
+#checkout.layout-douceur #deliveryDate{left:61.00%!important;top:66.27%!important;width:26.80%!important;height:2.57%!important}
+#checkout.layout-douceur #timeSlot{left:18.70%!important;top:71.23%!important;width:69.10%!important;height:2.57%!important}
+/* Paiement : deux cartes réellement contenues dans la zone sous le titre */
+.payment-selector{
+  left:7.8%!important; top:87.05%!important; width:84.4%!important; height:4.35%!important;
+  padding:.35% .55%!important; gap:2.0%!important;
+  background:#f3dfd3!important; border-radius:13px!important; overflow:hidden!important;
+  display:grid!important; grid-template-columns:1fr 1fr!important; z-index:58!important;
+}
+#checkout.layout-douceur .payment-selector{top:87.05%!important}
+.pay-choice{
+  height:100%!important; min-height:0!important; padding:3px 5px!important;
+  border-radius:11px!important; border:1px solid rgba(91,33,13,.22)!important;
+  background:#fffaf7!important; display:flex!important; flex-direction:column!important;
+  align-items:center!important; justify-content:center!important; gap:2px!important;
+  font:700 clamp(8px,1.85vw,10px)/1.05 Arial,Helvetica,sans-serif!important;
+  color:#4b2618!important; overflow:hidden!important; text-align:center!important;
+}
+.pay-choice .pay-icon{width:21px!important;height:21px!important;min-width:21px!important;min-height:21px!important;border-radius:5px!important}
+.pay-choice .pay-icon.cash{font-size:16px!important}
+.pay-choice .pay-label{white-space:normal!important;line-height:1.05!important;max-width:100%!important}
+.pay-choice.selected{border:2px solid #6b2a13!important}
+@media(max-width:380px){
+  #lastName,#firstName,#phone,#address,#zone,#deliveryDate,#timeSlot{font-size:10px!important;padding-left:8px!important;padding-right:8px!important}
+  #zone,#timeSlot{padding-right:24px!important}
+  .pay-choice{font-size:8px!important;padding:2px 3px!important}
+  .pay-choice .pay-icon{width:18px!important;height:18px!important;min-width:18px!important;min-height:18px!important}
+}
+
+<style>#checkout .order-field::placeholder{color:#b9a3a7!important;opacity:1}</style><style>
+/* === CHAMPS CLIENT : version globale stable, sans débordement === */
+#checkout #lastName,#checkout #firstName,#checkout #phone,#checkout #address,#checkout #zone,#checkout #deliveryDate,#checkout #timeSlot{
+  opacity:0!important; background:transparent!important; color:transparent!important;
+  border:0!important; box-shadow:none!important; outline:none!important;
+  z-index:60!important; cursor:text!important; touch-action:manipulation!important;
+  -webkit-appearance:none!important; appearance:none!important;
+}
+#checkout #zone,#checkout #deliveryDate,#checkout #timeSlot{cursor:pointer!important}
+#checkout .field-proxy{
+  position:absolute!important; z-index:50!important; display:none!important;
+  align-items:center!important; justify-content:flex-start!important;
+  text-align:left!important; overflow:hidden!important; white-space:nowrap!important;
+  text-overflow:ellipsis!important; box-sizing:border-box!important;
+  background:#fffaf7!important; color:#4b3027!important;
+  font-family:Arial,Helvetica,sans-serif!important;
+  font-size:clamp(9px,2.05vw,11px)!important; font-weight:400!important; line-height:1!important;
+  padding:0 10px!important; border-radius:9px!important; pointer-events:none!important;
+}
+#checkout .field-proxy.visible{display:flex!important}
+#checkout #zoneProxy,#checkout #deliveryDateProxy,#checkout #timeSlotProxy{
+  padding-left:10px!important; padding-right:25px!important;
+}
+#checkout #zoneProxy::after,#checkout #deliveryDateProxy::after,#checkout #timeSlotProxy::after{
+  content:'⌄'!important; position:absolute!important; right:8px!important; top:50%!important;
+  transform:translateY(-56%)!important; font-size:13px!important; font-weight:700!important; color:#3b2016!important;
+}
+/* Empêche le texte d'atteindre les titres ou de sortir des cases sur petits écrans */
+@media(max-width:380px){
+  #checkout .field-proxy{font-size:9px!important;padding-left:8px!important;padding-right:8px!important}
+  #checkout #zoneProxy,#checkout #deliveryDateProxy,#checkout #timeSlotProxy{padding-right:22px!important}
+}
+</style>
+<style id="cake-lab-final-clean-fix">
+/* FINAL: one input layer only. No proxy, no duplicated placeholder. */
+#checkout .field-proxy{display:none!important}
+#checkout .order-field{
+ position:absolute!important;z-index:80!important;opacity:1!important;
+ background:transparent!important;color:transparent!important;caret-color:#51382f!important;
+ border:0!important;outline:0!important;box-shadow:none!important;margin:0!important;
+ padding:0 9px!important;border-radius:10px!important;box-sizing:border-box!important;
+ font-family:Arial,Helvetica,sans-serif!important;font-size:clamp(9px,2.15vw,11px)!important;
+ font-weight:400!important;line-height:1.15!important;
+ -webkit-appearance:none!important;appearance:none!important;
+ white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+}
+#checkout .order-field::placeholder{color:transparent!important;opacity:0!important}
+#checkout .order-field:focus{background:transparent!important;color:transparent!important}
+#checkout .order-field.has-value,#checkout .order-field.has-value:focus{
+ background:#fffaf7!important;color:#51382f!important;
+}
+#checkout #lastName,#checkout #firstName,#checkout #phone,#checkout #address{text-align:left!important}
+#checkout #zone,#checkout #deliveryDate,#checkout #timeSlot{text-align:center!important;text-align-last:center!important}
+
+/* STANDARD CAKES + STANDARD MINI BOXES: coordinates measured on the artwork itself. */
+#checkout:not(.layout-douceur) #lastName{left:10.63%!important;top:46.17%!important;width:37.94%!important;height:3.89%!important}
+#checkout:not(.layout-douceur) #firstName{left:52.18%!important;top:46.17%!important;width:37.30%!important;height:3.89%!important}
+#checkout:not(.layout-douceur) #phone{left:18.50%!important;top:52.87%!important;width:69.85%!important;height:3.29%!important}
+#checkout:not(.layout-douceur) #address{left:18.92%!important;top:64.17%!important;width:33.05%!important;height:3.11%!important}
+#checkout:not(.layout-douceur) #zone{left:61.64%!important;top:64.17%!important;width:28.69%!important;height:3.11%!important;padding-left:8px!important;padding-right:22px!important}
+#checkout:not(.layout-douceur) #deliveryDate{left:18.92%!important;top:69.92%!important;width:32.41%!important;height:2.99%!important;padding-left:8px!important;padding-right:22px!important}
+#checkout:not(.layout-douceur) #timeSlot{left:61.64%!important;top:69.92%!important;width:28.69%!important;height:3.05%!important;padding-left:8px!important;padding-right:22px!important}
+
+/* BOX DOUCEUR: its artwork uses a different form geometry. */
+#checkout.layout-douceur #lastName{left:11.05%!important;top:43.54%!important;width:36.34%!important;height:3.47%!important}
+#checkout.layout-douceur #firstName{left:52.71%!important;top:43.54%!important;width:36.34%!important;height:3.47%!important}
+#checkout.layout-douceur #phone{left:18.70%!important;top:50.54%!important;width:70.35%!important;height:2.75%!important}
+#checkout.layout-douceur #address{left:19.02%!important;top:61.78%!important;width:69.93%!important;height:2.57%!important}
+#checkout.layout-douceur #zone{left:19.02%!important;top:67.17%!important;width:29.44%!important;height:2.51%!important;padding-left:8px!important;padding-right:22px!important}
+#checkout.layout-douceur #deliveryDate{left:61.96%!important;top:67.17%!important;width:26.04%!important;height:2.51%!important;padding-left:8px!important;padding-right:22px!important}
+#checkout.layout-douceur #timeSlot{left:19.02%!important;top:72.43%!important;width:69.93%!important;height:2.45%!important;padding-left:8px!important;padding-right:22px!important}
+
+/* Show a clean arrow only after a real select value covers the printed artwork. */
+#checkout #zone.has-value,#checkout #timeSlot.has-value{
+ background-color:#fffaf7!important;
+ background-image:linear-gradient(45deg,transparent 50%,#3b2016 50%),linear-gradient(135deg,#3b2016 50%,transparent 50%)!important;
+ background-position:calc(100% - 14px) 50%,calc(100% - 9px) 50%!important;
+ background-size:5px 5px,5px 5px!important;background-repeat:no-repeat!important;
+}
+#checkout #deliveryDate::-webkit-calendar-picker-indicator{opacity:0!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;cursor:pointer!important}
+#checkout .time-open-hit{display:none!important}
+
+/* PAYMENT: clean two-button row inside the original payment area. */
+#checkout .payment-selector{
+ position:absolute!important;z-index:90!important;
+ left:9.0%!important;top:87.00%!important;width:82.0%!important;height:4.80%!important;
+ display:grid!important;grid-template-columns:1fr 1fr!important;gap:2.0%!important;
+ margin:0!important;padding:3px!important;box-sizing:border-box!important;
+ background:rgba(250,239,231,.985)!important;border-radius:11px!important;overflow:hidden!important;
+}
+#checkout.layout-douceur .payment-selector{top:87.00%!important}
+#checkout .pay-choice{
+ width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;
+ margin:0!important;padding:2px 4px!important;border-radius:9px!important;
+ border:1px solid rgba(91,33,13,.28)!important;background:#fffaf7!important;
+ display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;
+ gap:4px!important;box-sizing:border-box!important;overflow:hidden!important;
+ color:#4b2618!important;text-align:center!important;
+ font-family:Arial,Helvetica,sans-serif!important;font-size:clamp(7px,1.75vw,9px)!important;font-weight:700!important;line-height:1.05!important;
+}
+#checkout .pay-choice .pay-icon{width:17px!important;height:17px!important;min-width:17px!important;min-height:17px!important;border-radius:4px!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important}
+#checkout .pay-choice .pay-icon img{width:100%!important;height:100%!important;object-fit:contain!important;display:block!important}
+#checkout .pay-choice .pay-icon.cash{font-size:13px!important}
+#checkout .pay-choice .pay-label{display:block!important;white-space:normal!important;overflow:hidden!important;line-height:1.05!important;max-width:calc(100% - 21px)!important}
+#checkout .pay-choice.selected{border:1.5px solid #6b2a13!important}
+
+@media(max-width:380px){
+ #checkout .order-field{font-size:9px!important;padding-left:7px!important;padding-right:7px!important}
+ #checkout .pay-choice{font-size:7px!important;gap:3px!important;padding:1px 2px!important}
+ #checkout .pay-choice .pay-icon{width:14px!important;height:14px!important;min-width:14px!important;min-height:14px!important}
+}
+</style>
+
+<style id="cake-lab-input-visible-final">
+/* Correctif minimal : le texte saisi devient visible, sans déplacer les champs. */
+#checkout .order-field{caret-color:#51382f!important;}
+#checkout .order-field.has-value{
+  opacity:1!important;
+  color:#51382f!important;
+  background:#fffaf7!important;
+  font-size:clamp(9px,2.05vw,11px)!important;
+  line-height:1!important;
+}
+#checkout input.order-field.has-value{
+  text-align:left!important;
+}
+#checkout select.order-field.has-value,#checkout #deliveryDate.has-value{
+  text-align:center!important;
+  text-align-last:center!important;
+}
+#checkout .order-field:focus:not(.has-value){
+  color:transparent!important;
+  background:transparent!important;
+}
+</style>
+
+<style id="cake-lab-final-client-fields-exact">
+/* FINAL correction: Nom, Prénom et Téléphone exactement dans les cases dessinées. */
+#checkout:not(.layout-douceur) #lastName{left:10.627%!important;top:45.036%!important;width:37.513%!important;height:4.007%!important}
+#checkout:not(.layout-douceur) #firstName{left:51.966%!important;top:45.036%!important;width:37.407%!important;height:4.007%!important}
+#checkout:not(.layout-douceur) #phone{left:18.810%!important;top:51.555%!important;width:70.563%!important;height:3.349%!important}
+
+/* Box Douceur : géométrie spécifique mesurée sur son visuel. */
+#checkout.layout-douceur #lastName{left:11.052%!important;top:43.541%!important;width:36.344%!important;height:3.469%!important}
+#checkout.layout-douceur #firstName{left:52.710%!important;top:43.541%!important;width:36.451%!important;height:3.469%!important}
+#checkout.layout-douceur #phone{left:18.704%!important;top:50.478%!important;width:70.457%!important;height:2.811%!important}
+
+#checkout #lastName,#checkout #firstName,#checkout #phone{
+  opacity:1!important;
+  border:0!important;outline:0!important;box-shadow:none!important;
+  border-radius:9px!important;box-sizing:border-box!important;
+  padding:0 12px!important;margin:0!important;
+  font-family:Arial,Helvetica,sans-serif!important;
+  font-size:clamp(9px,2.0vw,11px)!important;font-weight:400!important;line-height:1.1!important;
+  text-align:left!important;vertical-align:middle!important;
+  caret-color:#51382f!important;
+  -webkit-appearance:none!important;appearance:none!important;
+}
+#checkout #lastName:not(.has-value),#checkout #firstName:not(.has-value),#checkout #phone:not(.has-value){
+  background:transparent!important;color:transparent!important;-webkit-text-fill-color:transparent!important;
+}
+#checkout #lastName.has-value,#checkout #firstName.has-value,#checkout #phone.has-value,
+#checkout #lastName.has-value:focus,#checkout #firstName.has-value:focus,#checkout #phone.has-value:focus{
+  background:#fffaf7!important;color:#51382f!important;-webkit-text-fill-color:#51382f!important;
+  box-shadow:none!important;
+}
+/* Empêche Android/Samsung/Chrome de mettre un fond bleu d'autoremplissage. */
+#checkout #lastName:-webkit-autofill,#checkout #firstName:-webkit-autofill,#checkout #phone:-webkit-autofill,
+#checkout #lastName:-webkit-autofill:hover,#checkout #firstName:-webkit-autofill:hover,#checkout #phone:-webkit-autofill:hover,
+#checkout #lastName:-webkit-autofill:focus,#checkout #firstName:-webkit-autofill:focus,#checkout #phone:-webkit-autofill:focus{
+  -webkit-text-fill-color:#51382f!important;
+  -webkit-box-shadow:0 0 0 1000px #fffaf7 inset!important;
+  box-shadow:0 0 0 1000px #fffaf7 inset!important;
+  background:#fffaf7!important;
+}
+@media(max-width:380px){
+  #checkout #lastName,#checkout #firstName,#checkout #phone{font-size:9px!important;padding-left:9px!important;padding-right:9px!important}
+}
+</style>
+
+<style id="cake-lab-lemon-fields-exact">
+/* Cake Citron : positions mesurées directement sur les vraies cases blanches du visuel 941×1672. */
+#checkout.layout-lemon #lastName{left:10.946%!important;top:44.557%!important;width:36.982%!important;height:3.888%!important}
+#checkout.layout-lemon #firstName{left:52.072%!important;top:44.498%!important;width:37.088%!important;height:3.947%!important}
+#checkout.layout-lemon #phone{left:18.597%!important;top:50.897%!important;width:70.563%!important;height:3.349%!important}
+#checkout.layout-lemon #address{left:18.810%!important;top:62.201%!important;width:33.262%!important;height:3.349%!important}
+#checkout.layout-lemon #zone{left:61.530%!important;top:62.261%!important;width:29.012%!important;height:3.289%!important;padding-left:8px!important;padding-right:22px!important}
+#checkout.layout-lemon #deliveryDate{left:18.916%!important;top:67.883%!important;width:32.625%!important;height:3.170%!important;padding-left:8px!important;padding-right:22px!important}
+#checkout.layout-lemon #timeSlot{left:61.530%!important;top:68.002%!important;width:29.012%!important;height:3.050%!important;padding-left:8px!important;padding-right:22px!important}
+
+/* Même rendu propre que la page Chocolat : texte discret dans la case, aucun fond bleu Android. */
+#checkout.layout-lemon #lastName,#checkout.layout-lemon #firstName,#checkout.layout-lemon #phone,
+#checkout.layout-lemon #address,#checkout.layout-lemon #zone,#checkout.layout-lemon #deliveryDate,#checkout.layout-lemon #timeSlot{
+  font-size:clamp(9px,2.0vw,11px)!important;line-height:1!important;box-sizing:border-box!important;
+}
+#checkout.layout-lemon #phone.has-value,#checkout.layout-lemon #phone.has-value:focus{
+  background:#fffaf7!important;color:#51382f!important;-webkit-text-fill-color:#51382f!important;
+  -webkit-box-shadow:0 0 0 1000px #fffaf7 inset!important;box-shadow:0 0 0 1000px #fffaf7 inset!important;
+}
+#checkout.layout-lemon #phone:-webkit-autofill,#checkout.layout-lemon #phone:-webkit-autofill:hover,#checkout.layout-lemon #phone:-webkit-autofill:focus{
+  -webkit-text-fill-color:#51382f!important;-webkit-box-shadow:0 0 0 1000px #fffaf7 inset!important;
+  box-shadow:0 0 0 1000px #fffaf7 inset!important;background:#fffaf7!important;
+}
+</style>
+
+<style id="cake-lab-all-cakes-fields-reference-chocolate">
+/* Référence verrouillée : Cake Chocolat. Les autres cakes sont recalés sur leurs vraies cases blanches. */
+/* Cake Chocolat : inchangé, référence validée. */
+#checkout.layout-chocolate #lastName{left:10.627%!important;top:45.036%!important;width:37.513%!important;height:4.007%!important}
+#checkout.layout-chocolate #firstName{left:51.966%!important;top:45.036%!important;width:37.407%!important;height:4.007%!important}
+#checkout.layout-chocolate #phone{left:18.810%!important;top:51.555%!important;width:70.563%!important;height:3.349%!important}
+#checkout.layout-chocolate #address{left:18.916%!important;top:64.175%!important;width:33.050%!important;height:3.110%!important}
+#checkout.layout-chocolate #zone{left:61.637%!important;top:64.175%!important;width:28.693%!important;height:3.110%!important}
+#checkout.layout-chocolate #deliveryDate{left:18.916%!important;top:69.916%!important;width:32.412%!important;height:2.990%!important}
+#checkout.layout-chocolate #timeSlot{left:61.637%!important;top:69.916%!important;width:28.693%!important;height:3.050%!important}
+
+/* Cake Citron */
+#checkout.layout-lemon #lastName{left:10.946%!important;top:44.557%!important;width:36.982%!important;height:3.888%!important}
+#checkout.layout-lemon #firstName{left:52.072%!important;top:44.498%!important;width:37.088%!important;height:3.947%!important}
+#checkout.layout-lemon #phone{left:18.597%!important;top:50.897%!important;width:70.563%!important;height:3.349%!important}
+#checkout.layout-lemon #address{left:18.810%!important;top:62.201%!important;width:33.262%!important;height:3.349%!important}
+#checkout.layout-lemon #zone{left:61.530%!important;top:62.261%!important;width:29.012%!important;height:3.289%!important}
+#checkout.layout-lemon #deliveryDate{left:18.916%!important;top:67.883%!important;width:32.625%!important;height:3.170%!important}
+#checkout.layout-lemon #timeSlot{left:61.530%!important;top:68.002%!important;width:29.012%!important;height:3.050%!important}
+
+/* Cake Coco */
+#checkout.layout-coco #lastName{left:11.158%!important;top:44.557%!important;width:37.513%!important;height:4.007%!important}
+#checkout.layout-coco #firstName{left:52.179%!important;top:44.557%!important;width:37.407%!important;height:4.007%!important}
+#checkout.layout-coco #phone{left:17.747%!important;top:51.136%!important;width:70.563%!important;height:3.349%!important}
+#checkout.layout-coco #address{left:18.810%!important;top:64.175%!important;width:33.050%!important;height:3.110%!important}
+#checkout.layout-coco #zone{left:61.530%!important;top:64.175%!important;width:28.693%!important;height:3.110%!important}
+#checkout.layout-coco #deliveryDate{left:18.385%!important;top:69.856%!important;width:32.412%!important;height:2.990%!important}
+#checkout.layout-coco #timeSlot{left:61.530%!important;top:69.856%!important;width:28.693%!important;height:3.050%!important}
+
+/* Cake Vanille */
+#checkout.layout-vanilla #lastName{left:9.883%!important;top:44.258%!important;width:39.107%!important;height:3.409%!important}
+#checkout.layout-vanilla #firstName{left:51.647%!important;top:44.258%!important;width:38.470%!important;height:3.409%!important}
+#checkout.layout-vanilla #phone{left:17.853%!important;top:50.239%!important;width:71.732%!important;height:3.230%!important}
+#checkout.layout-vanilla #address{left:17.853%!important;top:61.304%!important;width:33.050%!important;height:3.110%!important}
+#checkout.layout-vanilla #zone{left:60.361%!important;top:61.304%!important;width:29.756%!important;height:3.110%!important}
+#checkout.layout-vanilla #deliveryDate{left:18.172%!important;top:66.866%!important;width:32.200%!important;height:2.990%!important}
+#checkout.layout-vanilla #timeSlot{left:60.361%!important;top:66.866%!important;width:29.756%!important;height:2.990%!important}
+
+/* Cake Moka Café */
+#checkout.layout-mocha #lastName{left:11.265%!important;top:45.455%!important;width:37.513%!important;height:4.007%!important}
+#checkout.layout-mocha #firstName{left:52.285%!important;top:45.455%!important;width:37.407%!important;height:4.007%!important}
+#checkout.layout-mocha #phone{left:18.916%!important;top:52.093%!important;width:70.563%!important;height:3.349%!important}
+#checkout.layout-mocha #address{left:18.810%!important;top:64.833%!important;width:33.050%!important;height:3.110%!important}
+#checkout.layout-mocha #zone{left:61.743%!important;top:64.833%!important;width:28.693%!important;height:3.110%!important}
+#checkout.layout-mocha #deliveryDate{left:18.704%!important;top:70.395%!important;width:32.412%!important;height:2.990%!important}
+#checkout.layout-mocha #timeSlot{left:61.637%!important;top:70.395%!important;width:28.693%!important;height:3.050%!important}
+
+/* Cake Mangue Vanille */
+#checkout.layout-mango #lastName{left:10.946%!important;top:45.634%!important;width:37.513%!important;height:4.007%!important}
+#checkout.layout-mango #firstName{left:51.966%!important;top:45.634%!important;width:37.407%!important;height:4.007%!important}
+#checkout.layout-mango #phone{left:18.704%!important;top:52.392%!important;width:70.563%!important;height:3.349%!important}
+#checkout.layout-mango #address{left:18.810%!important;top:64.892%!important;width:33.050%!important;height:3.110%!important}
+#checkout.layout-mango #zone{left:61.743%!important;top:64.892%!important;width:28.693%!important;height:3.110%!important}
+#checkout.layout-mango #deliveryDate{left:18.597%!important;top:70.754%!important;width:32.412%!important;height:2.990%!important}
+#checkout.layout-mango #timeSlot{left:61.530%!important;top:70.754%!important;width:28.693%!important;height:3.050%!important}
+
+/* Cake du mois — Bissap Vanille */
+#checkout.layout-monthly #lastName{left:11.477%!important;top:45.455%!important;width:37.513%!important;height:4.007%!important}
+#checkout.layout-monthly #firstName{left:52.072%!important;top:45.455%!important;width:37.407%!important;height:4.007%!important}
+#checkout.layout-monthly #phone{left:19.447%!important;top:52.093%!important;width:70.563%!important;height:3.349%!important}
+#checkout.layout-monthly #address{left:18.810%!important;top:64.952%!important;width:33.050%!important;height:3.110%!important}
+#checkout.layout-monthly #zone{left:61.530%!important;top:64.952%!important;width:28.693%!important;height:3.110%!important}
+#checkout.layout-monthly #deliveryDate{left:18.597%!important;top:70.754%!important;width:32.412%!important;height:2.990%!important}
+#checkout.layout-monthly #timeSlot{left:61.530%!important;top:70.754%!important;width:28.693%!important;height:3.050%!important}
+
+/* Même rendu que la page Chocolat validée sur tous les cakes. */
+#checkout.layout-chocolate .order-field,#checkout.layout-lemon .order-field,#checkout.layout-coco .order-field,
+#checkout.layout-vanilla .order-field,#checkout.layout-mocha .order-field,#checkout.layout-mango .order-field,#checkout.layout-monthly .order-field{
+  box-sizing:border-box!important;
+  font-size:clamp(9px,2vw,11px)!important;
+  line-height:1.05!important;
+  border:0!important;outline:0!important;box-shadow:none!important;
+  padding-left:10px!important;padding-right:10px!important;
+  caret-color:#51382f!important;
+}
+#checkout.layout-chocolate #phone,#checkout.layout-lemon #phone,#checkout.layout-coco #phone,
+#checkout.layout-vanilla #phone,#checkout.layout-mocha #phone,#checkout.layout-mango #phone,#checkout.layout-monthly #phone{
+  background:transparent!important;
+  -webkit-box-shadow:none!important;box-shadow:none!important;
+}
+#checkout.layout-chocolate #phone.has-value,#checkout.layout-lemon #phone.has-value,#checkout.layout-coco #phone.has-value,
+#checkout.layout-vanilla #phone.has-value,#checkout.layout-mocha #phone.has-value,#checkout.layout-mango #phone.has-value,#checkout.layout-monthly #phone.has-value{
+  background:#fffaf7!important;color:#51382f!important;-webkit-text-fill-color:#51382f!important;
+  -webkit-box-shadow:0 0 0 1000px #fffaf7 inset!important;box-shadow:0 0 0 1000px #fffaf7 inset!important;
+}
+#checkout.layout-chocolate #phone:-webkit-autofill,#checkout.layout-lemon #phone:-webkit-autofill,#checkout.layout-coco #phone:-webkit-autofill,
+#checkout.layout-vanilla #phone:-webkit-autofill,#checkout.layout-mocha #phone:-webkit-autofill,#checkout.layout-mango #phone:-webkit-autofill,#checkout.layout-monthly #phone:-webkit-autofill{
+  -webkit-text-fill-color:#51382f!important;-webkit-box-shadow:0 0 0 1000px #fffaf7 inset!important;box-shadow:0 0 0 1000px #fffaf7 inset!important;
+}
+</style>
+
+
+<style id="cake-lab-corrections-entourees-finales">
+/* Corrections demandées sur les zones entourées. Cake Chocolat reste la référence verrouillée. */
+
+/* -------- BOX TERANGA : champs calés sur les rectangles imprimés -------- */
+#checkout.layout-box_teranga #lastName{left:10.84%!important;top:46.05%!important;width:36.45%!important;height:3.70%!important}
+#checkout.layout-box_teranga #firstName{left:51.65%!important;top:46.05%!important;width:36.35%!important;height:3.70%!important}
+#checkout.layout-box_teranga #phone{left:18.17%!important;top:52.75%!important;width:69.82%!important;height:3.10%!important}
+#checkout.layout-box_teranga #address{left:18.70%!important;top:64.89%!important;width:32.84%!important;height:3.05%!important}
+#checkout.layout-box_teranga #zone{left:60.68%!important;top:64.89%!important;width:28.59%!important;height:3.05%!important}
+#checkout.layout-box_teranga #deliveryDate{left:18.70%!important;top:70.28%!important;width:32.84%!important;height:3.05%!important}
+#checkout.layout-box_teranga #timeSlot{left:60.68%!important;top:70.28%!important;width:28.59%!important;height:3.05%!important}
+
+/* -------- BOX GOURMANDE -------- */
+#checkout.layout-box_gourmande #lastName{left:10.84%!important;top:46.17%!important;width:36.45%!important;height:3.70%!important}
+#checkout.layout-box_gourmande #firstName{left:51.86%!important;top:46.17%!important;width:36.03%!important;height:3.70%!important}
+#checkout.layout-box_gourmande #phone{left:18.17%!important;top:52.45%!important;width:69.71%!important;height:3.10%!important}
+#checkout.layout-box_gourmande #address{left:18.70%!important;top:64.89%!important;width:32.84%!important;height:3.05%!important}
+#checkout.layout-box_gourmande #zone{left:60.68%!important;top:64.89%!important;width:28.59%!important;height:3.05%!important}
+#checkout.layout-box_gourmande #deliveryDate{left:18.70%!important;top:70.28%!important;width:32.84%!important;height:3.05%!important}
+#checkout.layout-box_gourmande #timeSlot{left:60.68%!important;top:70.28%!important;width:28.59%!important;height:3.05%!important}
+
+/* -------- BOX EXOTIQUE : visuel plus bas que les autres box -------- */
+#checkout.layout-box_exotic #lastName{left:10.73%!important;top:47.31%!important;width:37.73%!important;height:3.70%!important}
+#checkout.layout-box_exotic #firstName{left:51.97%!important;top:47.31%!important;width:37.09%!important;height:3.70%!important}
+#checkout.layout-box_exotic #phone{left:18.38%!important;top:53.29%!important;width:70.67%!important;height:3.55%!important}
+#checkout.layout-box_exotic #address{left:19.02%!important;top:65.49%!important;width:33.48%!important;height:2.95%!important}
+#checkout.layout-box_exotic #zone{left:61.53%!important;top:65.49%!important;width:29.12%!important;height:2.95%!important}
+#checkout.layout-box_exotic #deliveryDate{left:19.02%!important;top:70.87%!important;width:33.16%!important;height:2.95%!important}
+#checkout.layout-box_exotic #timeSlot{left:61.53%!important;top:70.87%!important;width:29.12%!important;height:2.95%!important}
+
+/* Les champs entourés utilisent la même petite police propre que Chocolat. */
+#checkout.layout-box_teranga .order-field,
+#checkout.layout-box_gourmande .order-field,
+#checkout.layout-box_exotic .order-field{
+  font-size:clamp(9px,2.0vw,11px)!important;line-height:1!important;
+  padding-left:9px!important;padding-right:9px!important;
+}
+#checkout.layout-box_teranga #zone,#checkout.layout-box_teranga #deliveryDate,#checkout.layout-box_teranga #timeSlot,
+#checkout.layout-box_gourmande #zone,#checkout.layout-box_gourmande #deliveryDate,#checkout.layout-box_gourmande #timeSlot,
+#checkout.layout-box_exotic #zone,#checkout.layout-box_exotic #deliveryDate,#checkout.layout-box_exotic #timeSlot{
+  padding-left:7px!important;padding-right:22px!important;
+}
+
+/* -------- QUANTITÉ : Vanille et Box Exotique -------- */
+#checkout.layout-vanilla .qty-minus{left:70.55%!important;top:31.52%!important;width:6.8%!important;height:4.10%!important}
+#checkout.layout-vanilla .qty-live{left:77.00%!important;top:31.88%!important;width:5.50%!important;height:3.45%!important;border-radius:10px!important}
+#checkout.layout-vanilla .qty-plus{left:83.42%!important;top:31.52%!important;width:6.8%!important;height:4.10%!important}
+#checkout.layout-box_exotic .qty-minus{left:67.38%!important;top:34.15%!important;width:7.0%!important;height:4.10%!important}
+#checkout.layout-box_exotic .qty-live{left:75.05%!important;top:34.45%!important;width:5.50%!important;height:3.40%!important;border-radius:10px!important}
+#checkout.layout-box_exotic .qty-plus{left:82.15%!important;top:34.15%!important;width:7.0%!important;height:4.10%!important}
+
+/* -------- PAIEMENT : même placement que Chocolat, adapté à chaque visuel -------- */
+#checkout.layout-mocha .payment-selector{top:87.48%!important;height:4.15%!important}
+#checkout.layout-mango .payment-selector{top:87.18%!important;height:4.15%!important}
+#checkout.layout-monthly .payment-selector{top:87.66%!important;height:4.15%!important}
+#checkout.layout-box_teranga .payment-selector{top:88.08%!important;height:4.15%!important}
+#checkout.layout-box_gourmande .payment-selector{top:88.02%!important;height:4.15%!important}
+#checkout.layout-box_exotic .payment-selector{top:88.32%!important;height:4.15%!important}
+#checkout.layout-douceur .payment-selector{top:88.00%!important;height:4.10%!important}
+
+/* Le fond reste limité aux deux choix : il ne remonte plus sur le titre et ne descend plus sur Valider. */
+#checkout.layout-mocha .payment-selector,
+#checkout.layout-mango .payment-selector,
+#checkout.layout-monthly .payment-selector,
+#checkout.layout-box_teranga .payment-selector,
+#checkout.layout-box_gourmande .payment-selector,
+#checkout.layout-box_exotic .payment-selector,
+#checkout.layout-douceur .payment-selector{
+  padding:3px!important;border-radius:10px!important;overflow:hidden!important;
+}
+</style>
+
+<style id="cake-lab-3-pages-last-fixes">
+/* VANILLE : conserver les coordonnées exactes des vraies cases, texte simplement plus discret. */
+#checkout.layout-vanilla .order-field{
+  font-size:clamp(8px,1.75vw,10px)!important;
+  line-height:1!important;
+  padding-left:9px!important;
+  padding-right:9px!important;
+}
+#checkout.layout-vanilla #zone,
+#checkout.layout-vanilla #deliveryDate,
+#checkout.layout-vanilla #timeSlot{
+  padding-left:8px!important;
+  padding-right:22px!important;
+}
+#checkout.layout-vanilla #phone.has-value,
+#checkout.layout-vanilla #phone.has-value:focus,
+#checkout.layout-vanilla #phone:-webkit-autofill,
+#checkout.layout-vanilla #phone:-webkit-autofill:hover,
+#checkout.layout-vanilla #phone:-webkit-autofill:focus{
+  background:#fffaf7!important;
+  color:#51382f!important;
+  -webkit-text-fill-color:#51382f!important;
+  -webkit-box-shadow:0 0 0 1000px #fffaf7 inset!important;
+  box-shadow:0 0 0 1000px #fffaf7 inset!important;
+}
+
+/* MANGUE + BISSAP : couvrir complètement l'ancien contenu du moyen de paiement,
+   sans toucher au titre ni au bouton Valider. */
+#checkout.layout-mango .payment-selector{
+  top:87.18%!important;
+  height:4.82%!important;
+  background:#f6e5da!important;
+  padding:3px!important;
+  overflow:hidden!important;
+}
+#checkout.layout-monthly .payment-selector{
+  top:87.66%!important;
+  height:4.82%!important;
+  background:#f6e5da!important;
+  padding:3px!important;
+  overflow:hidden!important;
+}
+#checkout.layout-mango .pay-choice,
+#checkout.layout-monthly .pay-choice{
+  height:100%!important;
+  min-height:0!important;
+  align-self:stretch!important;
+}
+</style>
+
+<style id="cake-lab-vanille-teranga-final-fix">
+/* VANILLE — recaler uniquement les 4 champs de livraison sur les vraies cases blanches du visuel. */
+#checkout.layout-vanilla #address{left:18.28%!important;top:62.20%!important;width:33.37%!important;height:3.00%!important}
+#checkout.layout-vanilla #zone{left:61.21%!important;top:62.20%!important;width:30.07%!important;height:3.00%!important;padding-left:8px!important;padding-right:22px!important}
+#checkout.layout-vanilla #deliveryDate{left:18.60%!important;top:67.82%!important;width:32.41%!important;height:3.11%!important;padding-left:8px!important;padding-right:22px!important}
+#checkout.layout-vanilla #timeSlot{left:61.21%!important;top:67.82%!important;width:30.07%!important;height:3.11%!important;padding-left:8px!important;padding-right:22px!important}
+#checkout.layout-vanilla #address,#checkout.layout-vanilla #zone,#checkout.layout-vanilla #deliveryDate,#checkout.layout-vanilla #timeSlot{
+  font-size:clamp(8px,1.75vw,10px)!important;line-height:1!important;
+}
+
+/* TERANGA — masquer uniquement l'ancienne phrase sous les deux choix de paiement. */
+#checkout.layout-box_teranga .checkout-canvas::after{
+  content:"";position:absolute;z-index:57;left:9.15%;top:92.10%;width:81.70%;height:1.15%;
+  background:#f6e5da;border-radius:0 0 10px 10px;pointer-events:none;
+}
+#checkout.layout-box_teranga .payment-selector{z-index:58!important}
+</style>
+</head><body><div id="app">
+<section id="home" class="screen active"><img class="art" fetchpriority="high" decoding="async" src="./cl-home.webp" alt="Accueil Cake Lab"><button class="hotspot" style="left:4.8%;top:35.0%;width:38.5%;height:5.7%" onclick="show('catalog')">Voir les cakes</button><button class="hotspot" style="left:4.8%;top:40.9%;width:38.5%;height:6.2%" onclick="show('boxes')">Voir les mini cakes</button><button class="hotspot" style="left:2%;top:4.2%;width:12%;height:6%" onclick="openDrawer()">Menu</button><button class="hotspot cart-hit" style="right:2%;top:4.2%;width:12%;height:6%" onclick="openCart()">Panier</button><div id="homeBadge" class="live-badge">0</div></section>
+<section id="catalog" class="screen"><img class="art" loading="eager" decoding="async" fetchpriority="high" src="./cl-catalogue.webp" alt="Nos cakes"><button class="hotspot" style="left:2%;top:1.1%;width:14%;height:6%" onclick="openDrawer()">Menu</button><button class="hotspot cart-hit" style="right:2%;top:1.1%;width:14%;height:6%" onclick="openCart()">Panier</button><div id="catalogBadge" class="live-badge">0</div>
+<button class="hotspot" style="left:3.7%;top:13.8%;width:42.3%;height:22.7%" onclick="choose('chocolate')">Cake Chocolat</button><button class="hotspot" style="left:48.2%;top:13.8%;width:42.4%;height:22.7%" onclick="choose('lemon')">Cake Citron</button><button class="hotspot" style="left:3.7%;top:37.45%;width:42.3%;height:22.3%" onclick="choose('coco')">Cake Coco</button><button class="hotspot" style="left:48.2%;top:37.45%;width:42.4%;height:22.3%" onclick="choose('vanilla')">Vanille</button><button class="hotspot" style="left:3.7%;top:60.25%;width:42.3%;height:21.25%" onclick="choose('mocha')">Mocha</button><button class="hotspot" style="left:48.2%;top:60.25%;width:42.4%;height:21.25%" onclick="choose('mango')">Mangue Vanille</button><button class="hotspot" style="left:3.0%;top:82.15%;width:92.5%;height:15.7%" onclick="choose('monthly')">Bissap Vanille</button></section>
+<section id="boxes" class="screen"><img class="art" loading="eager" decoding="async" fetchpriority="high" src="./cl-boxes.webp" alt="Nos box mini"><button class="hotspot" style="left:2%;top:1%;width:14%;height:7%" onclick="openDrawer()">Menu</button><button class="hotspot cart-hit" style="right:2%;top:1%;width:14%;height:7%" onclick="openCart()">Panier</button><div id="boxesBadge" class="live-badge">0</div><button class="hotspot" style="left:3.2%;top:22.8%;width:44%;height:36.4%" onclick="choose('box_exotic')">Box Exotique</button><button class="hotspot" style="left:49.2%;top:22.8%;width:44%;height:36.4%" onclick="choose('box_douceur')">Box Douceur</button><button class="hotspot" style="left:3.2%;top:59.7%;width:44%;height:35.8%" onclick="choose('box_gourmande')">Box Gourmande</button><button class="hotspot" style="left:49.2%;top:59.7%;width:44%;height:35.8%" onclick="choose('box_teranga')">Box Teranga</button></section>
+<section id="checkout" class="screen"><div class="checkout-canvas"><img id="checkoutArt" decoding="async" alt="Votre commande Cake Lab"><button class="hotspot menu-hit" onclick="openDrawer()">Menu</button><button class="hotspot cart-hit bag-hit" onclick="openCart()">Panier</button><div id="checkoutBadge" class="live-badge is-empty">1</div><button class="qty-hit qty-minus" onclick="changeQty(-1)" aria-label="Retirer un article">−</button><div id="qtyLive" class="qty-live is-one">1</div><button class="qty-hit qty-plus" onclick="changeQty(1)" aria-label="Ajouter un article">+</button>
+<input id="lastName" class="order-field" aria-label="Nom" autocomplete="family-name"><input id="firstName" class="order-field" aria-label="Prénom" autocomplete="given-name"><input id="phone" class="order-field" aria-label="Numéro de téléphone / WhatsApp" inputmode="tel" autocomplete="tel"><input id="address" class="order-field" aria-label="Adresse de livraison" autocomplete="street-address"><select id="zone" class="order-field"><option value="">Sélectionnez votre zone</option><option value="Plateau">Plateau — 1 000 F</option><option value="Point E">Point E — 2 000 F</option><option value="Mermoz">Mermoz — 2 500 F</option><option value="Fann">Fann — 3 000 F</option><option value="Ouakam">Ouakam — 3 000 F</option><option value="Ngor">Ngor — 3 000 F</option><option value="Almadies">Almadies — 3 000 F</option></select><input id="deliveryDate" class="order-field" type="date"><select id="timeSlot" class="order-field"><option value="">Sélectionnez un créneau</option><option>09h00 - 11h00</option><option>11h00 - 13h00</option><option>14h00 - 16h00</option><option>16h00 - 18h00</option><option>18h00 - 20h00</option></select><button class="time-open-hit" type="button" onclick="openTimeSlot()" aria-label="Choisir une plage horaire">Plage horaire</button><input id="topper" type="checkbox"><div id="topperMark" class="topper-mark hidden">✓</div><button class="validate-hit" onclick="prepareOrder()">Valider ma commande</button></div></section>
+</div>
+<div id="drawerBg" class="drawer-bg" onclick="if(event.target===this)closeDrawer()"><aside class="drawer"><button class="close" onclick="closeDrawer()">×</button><h2>Cake Lab</h2><button onclick="show('home');closeDrawer()">Accueil</button><button onclick="show('catalog');closeDrawer()">Nos cakes</button><button onclick="show('boxes');closeDrawer()">Nos box mini</button><button onclick="openCart();closeDrawer()">Mon panier</button></aside></div>
+<div id="modalBg" class="modal-bg" onclick="if(event.target===this)closeModal()"><div id="sheet" class="sheet"></div></div><div id="toast" class="toast"></div>
+<script>
+const ART={"chocolate": "./cl-chocolat.webp", "lemon": "./cl-citron.webp", "coco": "./cl-coco.webp", "vanilla": "./cl-vanille.webp", "mocha": "./cl-moka.webp", "mango": "./cl-mangue.webp", "monthly": "./cl-bissap.webp", "box_exotic": "./cl-box-exotique.webp", "box_douceur": "./cl-box-douceur.webp", "box_gourmande": "./cl-box-gourmande.webp", "box_teranga": "./cl-box-teranga.webp"};
+// Performance only: preload order-page artwork in the browser cache after the first screen loads.
+function preloadCakeLabArtwork(){
+  const urls=[...new Set(Object.values(ART))];
+  let i=0;
+  const next=()=>{
+    if(i>=urls.length)return;
+    const img=new Image();
+    img.decoding='async';
+    img.onload=img.onerror=()=>{i++; setTimeout(next,25)};
+    img.src=urls[i];
+  };
+  next();
+}
+if(document.readyState==='complete'){
+  setTimeout(preloadCakeLabArtwork,150);
+}else{
+  window.addEventListener('load',()=>setTimeout(preloadCakeLabArtwork,150),{once:true});
+}
+
+const PRODUCTS={"chocolate": {"name": "Cake Chocolat", "price": 10000, "type": "cake"}, "lemon": {"name": "Cake Citron", "price": 10000, "type": "cake"}, "coco": {"name": "Cake Coco", "price": 10000, "type": "cake"}, "vanilla": {"name": "Cake Vanille", "price": 10000, "type": "cake"}, "mocha": {"name": "Cake Mocha Café", "price": 10000, "type": "cake"}, "mango": {"name": "Cake Mangue Vanille", "price": 10000, "type": "cake"}, "monthly": {"name": "Cake Bissap Vanille", "price": 11000, "type": "cake"}, "box_exotic": {"name": "Box Exotique", "price": 12000, "type": "box"}, "box_douceur": {"name": "Box Douceur", "price": 12000, "type": "box"}, "box_gourmande": {"name": "Box Gourmande", "price": 12000, "type": "box"}, "box_teranga": {"name": "Box Teranga", "price": 12000, "type": "box"}};
+const FEES={'Plateau':1000,'Point E':2000,'Mermoz':2500,'Fann':3000,'Ouakam':3000,'Ngor':3000,'Almadies':3000};
+const CAKE_LAB_SUPABASE_URL='https://mjcoidbfmzlqxvrnyayd.supabase.co';
+const CAKE_LAB_SUPABASE_KEY='sb_publishable_DcjUuH5aWrkAcXTw-02xZg_wZfd9wy3';
+const CAKE_LAB_WHATSAPP='221777535857';
+let cart=JSON.parse(localStorage.getItem('cakeLabFinalCart')||'[]');let current=null;let topperMessage='';let orderDraft=null;
+const $=id=>document.getElementById(id);const money=n=>new Intl.NumberFormat('fr-FR').format(n)+' F';
+function save(){localStorage.setItem('cakeLabFinalCart',JSON.stringify(cart))}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active');window.scrollTo({top:0,behavior:'instant'});updateBadges()}
+function choose(id){current=id;let f=cart.find(x=>x.id===id);if(f)f.qty++;else cart.push({id,qty:1});save();renderCheckout();show('checkout')}
+function renderCheckout(){if(!current)return;const checkout=$('checkout');const isDouceur=current==='box_douceur';checkout.classList.toggle('layout-douceur',isDouceur);['chocolate','lemon','coco','vanilla','mocha','mango','monthly','box_exotic','box_gourmande','box_teranga'].forEach(k=>checkout.classList.toggle('layout-'+k,current===k));$('checkoutArt').src=ART[current];['lastName','firstName','phone','address','zone','deliveryDate','timeSlot'].forEach(id=>$(id).removeAttribute('style'));const f=cart.find(x=>x.id===current);const q=f?f.qty:1;$('qtyLive').textContent=q;$('qtyLive').classList.toggle('is-one',q===1);setMinDate();syncDeliveryProxies();updateBadges()}
+function openTimeSlot(){const el=$('timeSlot');try{if(typeof el.showPicker==='function')el.showPicker();else{el.focus();el.click()}}catch(e){el.focus();el.click()}}
+function setMinDate(){const d=new Date();d.setDate(d.getDate()+1);$('deliveryDate').min=d.toISOString().slice(0,10)}
+function changeQty(delta){if(!current)return;let f=cart.find(x=>x.id===current);if(!f){f={id:current,qty:1};cart.push(f)}f.qty=Math.max(1,f.qty+delta);save();$('qtyLive').textContent=f.qty;$('qtyLive').classList.toggle('is-one',f.qty===1);updateBadges()}
+function updateBadges(){const n=cart.reduce((s,x)=>s+x.qty,0);['homeBadge','catalogBadge','boxesBadge','checkoutBadge'].forEach(id=>{const e=$(id);if(e){e.textContent=n;e.classList.toggle('is-empty',id==='checkoutBadge'?true:n===0)}})}
+function openDrawer(){$('drawerBg').classList.add('open')}function closeDrawer(){$('drawerBg').classList.remove('open')}function openModal(h){$('sheet').innerHTML=h;$('modalBg').classList.add('open')}function closeModal(){$('modalBg').classList.remove('open')}
+function openCart(){let total=0;let h='<button class="close" onclick="closeModal()">×</button><h3>Mon panier</h3>';if(!cart.length)h+='<p>Votre panier est vide.</p>';else{for(const x of cart){const p=PRODUCTS[x.id];total+=p.price*x.qty;h+=`<div class="cart-row cart-item"><div><b>${p.name}</b><small>${x.qty} × ${money(p.price)}</small></div><b>${money(p.price*x.qty)}</b><button class="trash-btn" type="button" onclick="removeCartItem('${x.id}')" aria-label="Supprimer ${p.name} du panier">🗑️</button></div>`}h+=`<div class="cart-total"><span>Total articles</span><span>${money(total)}</span></div><button class="primary" onclick="continueCart()">Continuer ma commande</button><button class="secondary" onclick="clearCart()">Vider le panier</button>`}openModal(h)}
+function removeCartItem(id){cart=cart.filter(x=>x.id!==id);if(current===id)current=cart.length?cart[0].id:null;save();updateBadges();if(current&&document.getElementById('checkout').classList.contains('active'))renderCheckout();openCart();}
+function continueCart(){closeModal();if(!current&&cart.length)current=cart[0].id;if(current){renderCheckout();show('checkout')}}
+function clearCart(){cart=[];current=null;save();updateBadges();closeModal();show('home')}
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(window.__to);window.__to=setTimeout(()=>e.classList.remove('show'),2500)}
+function prepareOrder(){
+ const ln=$('lastName').value.trim(),fn=$('firstName').value.trim(),ph=$('phone').value.trim(),ad=$('address').value.trim(),zo=$('zone').value,dt=$('deliveryDate').value,ts=$('timeSlot').value;
+ if(!cart.length){toast('Votre panier est vide.');return}
+ if(!ln||!fn||!ph||!ad||!zo||!dt||!ts){toast('Merci de remplir toutes les informations obligatoires.');return}
+ if($('topper').checked&&!topperMessage){topperMessage=(prompt('Quel texte souhaitez-vous sur le topper ?')||'').trim();if(!topperMessage){toast('Merci de saisir le message du topper personnalisé.');return}}
+ const subtotal=cart.reduce((s,x)=>s+PRODUCTS[x.id].price*x.qty,0),delivery=FEES[zo]||0,topper=$('topper').checked?1500:0,total=subtotal+delivery+topper;
+ const items=cart.map(x=>({id:x.id,name:PRODUCTS[x.id].name,qty:x.qty,unit_price:PRODUCTS[x.id].price,line_total:PRODUCTS[x.id].price*x.qty}));
+ orderDraft={first_name:fn,last_name:ln,phone:ph,address:ad,zone:zo,delivery_date:dt,time_slot:ts,items,subtotal,delivery_fee:delivery,topper_fee:topper,topper_message:topper?topperMessage:null,total,payment_method:'Paiement à la livraison'};
+ const rows=items.map(x=>`<div class="cart-row"><div><b>${x.name}</b><small>${x.qty} × ${money(x.unit_price)}</small></div><b>${money(x.line_total)}</b></div>`).join('');
+ openModal(`<button class="close" onclick="closeModal()">×</button><h3>Vérifier ma commande</h3>${rows}<div class="note"><b>Client :</b> ${fn} ${ln}<br><b>Téléphone :</b> ${ph}<br><b>Livraison :</b> ${ad}, ${zo}<br><b>Date :</b> ${dt} — ${ts}${topper?`<br><b>Topper :</b> ${topperMessage||'Oui'}`:''}<br><b>Paiement :</b> Paiement à la livraison</div><div class="cart-row"><span>Livraison</span><b>${money(delivery)}</b></div>${topper?`<div class="cart-row"><span>Topper</span><b>1 500 F</b></div>`:''}<div class="cart-total"><span>Total</span><span>${money(total)}</span></div><div class="note">Merci de prévoir le montant exact.</div><button class="primary" id="confirmOrderBtn" onclick="confirmOrder()">Confirmer ma commande</button><button class="secondary" onclick="closeModal()">Retour</button>`);
+}
+function orderWhatsAppText(order,orderId){
+ const lines=(order.items||[]).map(x=>`• ${x.name} × ${x.qty} — ${money(x.line_total)}`).join('\n');
+ return `Bonjour Cake Lab 🤎\nJe confirme ma commande #${String(orderId||'').slice(0,8).toUpperCase()}\n\nNom : ${order.first_name} ${order.last_name}\nTéléphone : ${order.phone}\n\nCommande :\n${lines}\n\nLivraison : ${order.address}, ${order.zone}\nDate : ${order.delivery_date} — ${order.time_slot}${order.topper_fee?`\nTopper : ${order.topper_message||'Oui'}`:''}\n\nPaiement : Espèces à la livraison\nTotal : ${money(order.total)}\nMerci de prévoir le montant exact.`;
+}
+async function saveOrderToSupabase(order){
+ const id=(window.crypto&&typeof window.crypto.randomUUID==='function')?window.crypto.randomUUID():`${Date.now().toString(16)}-0000-4000-8000-${Math.random().toString(16).slice(2,14).padEnd(12,'0')}`;
+ const payload={id,...order,status:'Nouvelle commande',source:'site'};
+ const r=await fetch(`${CAKE_LAB_SUPABASE_URL}/rest/v1/orders`,{method:'POST',headers:{'apikey':CAKE_LAB_SUPABASE_KEY,'Authorization':`Bearer ${CAKE_LAB_SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(payload)});
+ if(!r.ok){const detail=await r.text();throw new Error(detail||`Erreur ${r.status}`)}
+ return payload;
+}
+async function confirmOrder(){
+ if(!orderDraft){toast('Veuillez vérifier votre commande.');return}
+ const btn=$('confirmOrderBtn');if(btn){btn.disabled=true;btn.textContent='Enregistrement…'}
+ try{
+   const saved=await saveOrderToSupabase(orderDraft);
+   const waText=orderWhatsAppText(orderDraft,saved.id||'');
+   cart=[];current=null;save();updateBadges();closeModal();
+   toast('Votre commande est bien enregistrée 🤎');
+   orderDraft=null;topperMessage='';
+   setTimeout(()=>{window.location.href=`https://wa.me/${CAKE_LAB_WHATSAPP}?text=${encodeURIComponent(waText)}`},450);
+ }catch(e){
+   console.error(e);
+   if(btn){btn.disabled=false;btn.textContent='Confirmer ma commande'}
+   toast('La commande n’a pas pu être enregistrée. Merci de réessayer.');
+ }
+}
+
+
+function syncFieldState(el){el.classList.toggle('has-value',!!el.value)}
+function formatDateFr(v){if(!v)return'';const p=v.split('-');return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:v}
+function syncFieldProxy(id,proxyId){const el=$(id),proxy=$(proxyId);if(!el||!proxy)return;let value='';if(id==='zone'||id==='timeSlot'){value=el.value?el.options[el.selectedIndex].text:''}else if(id==='deliveryDate'){value=formatDateFr(el.value)}else{value=el.value.trim()}proxy.textContent=value;proxy.classList.toggle('visible',!!value)}
+function syncDeliveryProxies(){[['lastName','lastNameProxy'],['firstName','firstNameProxy'],['phone','phoneProxy'],['address','addressProxy'],['zone','zoneProxy'],['deliveryDate','deliveryDateProxy'],['timeSlot','timeSlotProxy']].forEach(([id,pid])=>syncFieldProxy(id,pid))}
+[['lastName','lastNameProxy'],['firstName','firstNameProxy'],['phone','phoneProxy'],['address','addressProxy'],['zone','zoneProxy'],['deliveryDate','deliveryDateProxy'],['timeSlot','timeSlotProxy']].forEach(([id,proxyId])=>{const el=$(id);if(!el)return;syncFieldState(el);syncFieldProxy(id,proxyId);const sync=()=>{syncFieldState(el);syncFieldProxy(id,proxyId)};el.addEventListener('input',sync);el.addEventListener('change',sync);el.addEventListener('blur',sync);});
+$('topper').addEventListener('change',()=>{const checked=$('topper').checked;$('topperMark').classList.toggle('hidden',!checked);if(checked){const currentMsg=topperMessage||'';const msg=prompt('Entrez le message personnalisé pour le topper :',currentMsg);if(msg===null){$('topper').checked=false;$('topperMark').classList.add('hidden');topperMessage='';return;}topperMessage=msg.trim();if(!topperMessage){toast('Merci de renseigner le texte du topper personnalisé.');}}else{topperMessage='';}});
+updateBadges();
+</script>
+<script id="cake-lab-input-visible-js">
+(function(){
+  const ids=['lastName','firstName','phone','address','zone','deliveryDate','timeSlot'];
+  function refresh(el){
+    if(!el) return;
+    const has=!!el.value;
+    el.classList.toggle('has-value',has);
+    if(has){
+      el.style.setProperty('color','#51382f','important');
+      el.style.setProperty('background','#fffaf7','important');
+      el.style.setProperty('opacity','1','important');
+    }else{
+      el.style.removeProperty('color');
+      el.style.removeProperty('background');
+      el.style.removeProperty('opacity');
+    }
+  }
+  function bind(){
+    ids.forEach(id=>{
+      const el=document.getElementById(id);
+      if(!el || el.dataset.visibleBound==='1') return;
+      el.dataset.visibleBound='1';
+      ['input','change','keyup','blur'].forEach(ev=>el.addEventListener(ev,()=>refresh(el)));
+      refresh(el);
+    });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bind); else bind();
+  setTimeout(bind,300);
+})();
+</script>
+</body></html>
