@@ -194,6 +194,59 @@ const BUCKET='product-images';
 let sb=null, currentUser=null, products=[], orders=[];
 let activeView='dashboard', filter='all', search='', sort='order', editingId=null;
 let pendingFile=null, pendingPreview='';
+let ordersInitialized=false, knownOrderIds=new Set(), orderPollTimer=null;
+let audioCtx=null, alertsArmed=false;
+
+function armOrderAlerts(){
+  if(alertsArmed)return;
+  alertsArmed=true;
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(AC){audioCtx=new AC();if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});}
+  }catch(e){}
+  if('Notification' in window && Notification.permission==='default'){
+    try{Notification.requestPermission().catch(()=>{});}catch(e){}
+  }
+}
+document.addEventListener('pointerdown',armOrderAlerts,{once:true,capture:true});
+document.addEventListener('keydown',armOrderAlerts,{once:true,capture:true});
+
+function playOrderSound(){
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!audioCtx && AC)audioCtx=new AC();
+    if(!audioCtx)return;
+    if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});
+    const now=audioCtx.currentTime;
+    [[0,740],[0.16,988],[0.34,740]].forEach(([delay,freq])=>{
+      const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+      o.type='sine';o.frequency.value=freq;
+      g.gain.setValueAtTime(0.0001,now+delay);
+      g.gain.exponentialRampToValueAtTime(0.22,now+delay+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,now+delay+0.14);
+      o.connect(g);g.connect(audioCtx.destination);o.start(now+delay);o.stop(now+delay+0.16);
+    });
+    if(navigator.vibrate)navigator.vibrate([180,80,180]);
+  }catch(e){}
+}
+
+function notifyNewOrder(o){
+  const client=[o.first_name,o.last_name].filter(Boolean).join(' ')||'Un client';
+  playOrderSound();
+  toast(`🔔 Nouvelle commande de ${client} — ${fmtPrice(o.total)}`);
+  document.title='🔔 Nouvelle commande — Cake Lab';
+  if('Notification' in window && Notification.permission==='granted'){
+    try{new Notification('Nouvelle commande Cake Lab',{body:`${client} • ${fmtPrice(o.total)}`,tag:`cake-lab-order-${o.id}`});}catch(e){}
+  }
+}
+
+function startOrderWatcher(){
+  if(orderPollTimer)clearInterval(orderPollTimer);
+  orderPollTimer=setInterval(async()=>{
+    if(!sb||!currentUser)return;
+    try{await loadOrders();}catch(e){console.warn('Actualisation commandes',e);}
+  },15000);
+}
 
 const seed=[
 {id:'chocolat',category:'cake',name:'Cake Chocolat',description:'Chocolat intense et ultra moelleux.',price:10000,image:'cl-chocolat.webp',active:true,isNew:false,isMonth:false,order:1},
@@ -237,7 +290,21 @@ function renderSnacks(){const arr=products.filter(p=>p.category==='snack');snack
 function orderPhoneLink(v){let n=String(v||'').replace(/\D/g,'');if(n.startsWith('00'))n=n.slice(2);if(n.startsWith('0'))n=n.slice(1);if(n.length===9)n='221'+n;return n}
 function orderCard(o){const items=Array.isArray(o.items)?o.items:[];const itemHtml=items.map(x=>`<div>• <b>${esc(x.name||'Article')}</b> × ${Number(x.qty||1)} — ${fmtPrice(x.line_total||((x.unit_price||0)*(x.qty||1)))}</div>`).join('');const d=o.created_at?new Date(o.created_at).toLocaleString('fr-FR'):'—';const phone=orderPhoneLink(o.phone);const statuses=['Nouvelle commande','En préparation','Prête','Livrée','Annulée'];return `<article class="order-card ${o.status==='Nouvelle commande'?'new-order':''}"><div class="order-top"><div><div class="order-id">Commande #${esc(String(o.id||'').slice(0,8).toUpperCase())}</div><div class="order-date">${esc(d)}</div></div><div class="order-total">${fmtPrice(o.total)}</div></div><div class="order-meta"><div><b>Client :</b> ${esc(o.first_name||'')} ${esc(o.last_name||'')}</div><div><b>Téléphone :</b> ${esc(o.phone||'')}</div><div><b>Adresse :</b> ${esc(o.address||'')}, ${esc(o.zone||'')}</div><div><b>Livraison :</b> ${esc(o.delivery_date||'')} — ${esc(o.time_slot||'')}</div>${o.topper_fee?`<div><b>Topper :</b> ${esc(o.topper_message||'Oui')}</div>`:''}<div><b>Paiement :</b> Espèces à la livraison</div></div><div class="order-items">${itemHtml||'Aucun article'}</div><div class="order-actions"><select class="order-status" onchange="updateOrderStatus('${esc(o.id)}',this.value)">${statuses.map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join('')}</select>${phone?`<a class="order-wa" href="https://wa.me/${phone}" target="_blank" rel="noopener">WhatsApp client</a>`:''}<button class="smallbtn red" onclick="deleteOrder('${esc(o.id)}')">Supprimer</button></div></article>`}
 function renderOrders(){ordersNavCount.textContent=orders.filter(o=>o.status==='Nouvelle commande').length;ordersList.innerHTML=orders.length?orders.map(orderCard).join(''):'<div class="orders-empty">Aucune commande pour le moment.</div>'}
-async function loadOrders(){const {data,error}=await sb.from('orders').select('*').order('created_at',{ascending:false});if(error){const msg=String(error.message||'');if(error.code==='42P01'||error.code==='PGRST205'||msg.toLowerCase().includes('orders')){orders=[];renderOrders();return}throw error}orders=data||[];renderOrders()}
+async function loadOrders(){
+  const {data,error}=await sb.from('orders').select('*').order('created_at',{ascending:false});
+  if(error){
+    const msg=String(error.message||'');
+    if(error.code==='42P01'||error.code==='PGRST205'||msg.toLowerCase().includes('orders')){orders=[];renderOrders();return}
+    throw error
+  }
+  const next=data||[];
+  const incoming=ordersInitialized?next.filter(o=>o.id&&!knownOrderIds.has(o.id)):[];
+  orders=next;
+  knownOrderIds=new Set(orders.map(o=>o.id).filter(Boolean));
+  renderOrders();
+  if(ordersInitialized&&incoming.length){incoming.slice().reverse().forEach(notifyNewOrder)}
+  ordersInitialized=true;
+}
 async function updateOrderStatus(id,status){const {error}=await sb.from('orders').update({status,updated_at:new Date().toISOString()}).eq('id',id);if(error){toast(error.message);return}await loadOrders();toast('Statut de la commande mis à jour.')}
 async function deleteOrder(id){if(!confirm('Supprimer définitivement cette commande ?'))return;const {error}=await sb.from('orders').delete().eq('id',id);if(error){toast(error.message);return}await loadOrders();toast('Commande supprimée.')}
 function renderAll(){renderStats();renderProducts();renderRecent();renderMonth();renderNew();renderSnacks();renderOrders()}
@@ -260,7 +327,7 @@ async function requireAdmin(){
  if(data!==true)throw new Error('Ce compte n’est pas autorisé comme administrateur Cake Lab.');
 }
 
-function switchView(v){activeView=v;document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+v));document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active',x.dataset.view===v));const titles={dashboard:['Tableau de bord','Gérez le catalogue Cake Lab sans modifier la mise en page du site public.'],orders:['Commandes','Consultez les nouvelles commandes reçues depuis le site.'],products:['Produits','Ajoutez, modifiez, masquez ou supprimez des produits.'],month:['Cake du mois','Changez facilement le produit mis en avant chaque mois.'],new:['Nouveautés','Choisissez les produits à mettre en avant comme nouveautés.'],snacks:['Snacks & biscuits','Préparez vos futures boîtes de biscuits et snacks.']};document.querySelector('.title h1').textContent=titles[v][0];subtitle.textContent=titles[v][1];window.scrollTo({top:0,behavior:'smooth'})}
+function switchView(v){activeView=v;if(v==='orders')document.title='Cake Lab — Administration';document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+v));document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active',x.dataset.view===v));const titles={dashboard:['Tableau de bord','Gérez le catalogue Cake Lab sans modifier la mise en page du site public.'],orders:['Commandes','Consultez les nouvelles commandes reçues depuis le site.'],products:['Produits','Ajoutez, modifiez, masquez ou supprimez des produits.'],month:['Cake du mois','Changez facilement le produit mis en avant chaque mois.'],new:['Nouveautés','Choisissez les produits à mettre en avant comme nouveautés.'],snacks:['Snacks & biscuits','Préparez vos futures boîtes de biscuits et snacks.']};document.querySelector('.title h1').textContent=titles[v][0];subtitle.textContent=titles[v][1];window.scrollTo({top:0,behavior:'smooth'})}
 document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>switchView(b.dataset.view));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>switchView(b.dataset.go));refreshOrdersBtn.onclick=async()=>{try{await loadOrders();toast('Commandes actualisées.')}catch(e){toast(e.message||'Actualisation impossible.')}};document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{filter=b.dataset.filter;document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('active',x===b));renderProducts()});searchInput.oninput=e=>{search=e.target.value;renderProducts()};sortSelect.onchange=e=>{sort=e.target.value;renderProducts()};
 
 function openAdd(category='cake',markNew=false){editingId=null;pendingFile=null;pendingPreview='';modalTitle.textContent='Ajouter un produit';dangerZone.style.display='none';fillForm({category,price:10000,name:'',description:'',order:products.length+1,image:'',imageUrl:'',active:true,isNew:markNew,isMonth:false});showProductModal()}
@@ -308,8 +375,8 @@ function setCfg(url,key){localStorage.setItem(CONFIG_KEY,JSON.stringify({url:url
 function showSetup(){loadingPanel.style.display='none';loginPanel.style.display='none';setupPanel.style.display='block';lockScreen.classList.add('show');const c=getCfg();if(c){cfgUrl.value=c.url||'';cfgKey.value=c.key||''}}
 function showLogin(){loadingPanel.style.display='none';setupPanel.style.display='none';loginPanel.style.display='block';lockScreen.classList.add('show')}
 async function connectClient(){const c=getCfg();if(!c?.url||!c?.key){showSetup();return false}try{sb=window.supabase.createClient(c.url,c.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});return true}catch(e){showSetup();toast('Configuration Supabase invalide.');return false}}
-async function openApp(session){currentUser=session.user;await requireAdmin();await loadRemote();lockScreen.classList.remove('show');setSync(true,'Supabase connecté',currentUser.email||'Administrateur');}
-async function boot(){loadingPanel.style.display='block';if(!await connectClient())return;const {data,error}=await sb.auth.getSession();if(error){showLogin();return}if(data.session){try{await openApp(data.session)}catch(e){console.error(e);showLogin();toast(e.message)}}else showLogin();sb.auth.onAuthStateChange(async(event,session)=>{if(event==='SIGNED_OUT'){currentUser=null;setSync(false,'Déconnecté','Connexion nécessaire.');showLogin()}})}
+async function openApp(session){currentUser=session.user;await requireAdmin();await loadRemote();lockScreen.classList.remove('show');setSync(true,'Supabase connecté',currentUser.email||'Administrateur');startOrderWatcher();}
+async function boot(){loadingPanel.style.display='block';if(!await connectClient())return;const {data,error}=await sb.auth.getSession();if(error){showLogin();return}if(data.session){try{await openApp(data.session)}catch(e){console.error(e);showLogin();toast(e.message)}}else showLogin();sb.auth.onAuthStateChange(async(event,session)=>{if(event==='SIGNED_OUT'){currentUser=null;if(orderPollTimer){clearInterval(orderPollTimer);orderPollTimer=null}setSync(false,'Déconnecté','Connexion nécessaire.');showLogin()}})}
 
 saveConfigBtn.onclick=async()=>{const u=cfgUrl.value.trim(),k=cfgKey.value.trim();if(!u||!k){toast('Collez l’URL et la clé publique Supabase.');return}setCfg(u,k);location.reload()};
 changeConfigBtn.onclick=()=>showSetup();
