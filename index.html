@@ -603,11 +603,94 @@
 }
 #checkout.layout-box_teranga .payment-selector{z-index:58!important}
 </style>
+
+<style id="cake-lab-mini-page-v2">
+#boxes.mini-page{background:linear-gradient(180deg,#fbf3eb 0%,#f6e7da 100%);min-height:100vh;padding-bottom:26px;color:#3b170c}
+#boxes.mini-page .cl-box-price-summary{display:none!important}
+#boxes .mini-header{position:relative;height:82px;display:grid;grid-template-columns:48px 1fr 48px;align-items:center;padding:10px 14px;background:rgba(255,250,246,.95);border-bottom:1px solid rgba(91,33,13,.12)}
+#boxes .mini-brand{text-align:center;font-family:Georgia,'Times New Roman',serif;line-height:1}
+#boxes .mini-brand strong{display:block;font-size:25px;letter-spacing:.7px;color:#4f1c0d}
+#boxes .mini-brand span{display:block;margin-top:5px;font:600 8px/1.15 Arial,sans-serif;letter-spacing:1.6px;text-transform:uppercase;color:#7b513f}
+#boxes .mini-icon-btn{width:42px;height:42px;border:0;background:transparent;color:#54200f;font-size:27px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+#boxes .mini-cart-btn{font-size:29px}
+#boxes .live-badge{right:9px;top:8px;width:24px;min-width:24px;height:24px;line-height:24px;font-size:11px}
+#boxes .mini-content{padding:22px 14px 8px}
+#boxes .mini-title-block{text-align:center;margin-bottom:18px}
+#boxes .mini-title-block h1{margin:0;font:700 40px/1 Georgia,'Times New Roman',serif;color:#4a1809}
+#boxes .mini-title-block h1:after{content:'';display:block;width:52px;height:2px;background:#b66331;margin:10px auto 11px;border-radius:5px}
+#boxes .mini-title-block p{margin:0 auto;max-width:440px;font:400 14px/1.45 Georgia,'Times New Roman',serif;color:#65402f}
+#boxes .mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#boxes .mini-card{margin:0;background:#fffaf6;border-radius:16px;overflow:hidden;box-shadow:0 7px 18px rgba(79,28,13,.08);border:1px solid rgba(91,33,13,.08)}
+#boxes .mini-card img{width:100%;aspect-ratio:1.18/1;object-fit:cover;display:block}
+#boxes .mini-card-copy{padding:10px 9px 12px;text-align:center}
+#boxes .mini-card h2{margin:0;font:700 19px/1.05 Georgia,'Times New Roman',serif;color:#4a1809}
+#boxes .mini-card h2:after{content:'';display:block;width:34px;height:1px;background:#bd734d;margin:7px auto}
+#boxes .mini-card p{margin:0;font:400 11.5px/1.32 Georgia,'Times New Roman',serif;color:#6b4939;min-height:45px}
+#boxes .mini-discovery-panel{margin-top:16px;padding:22px 20px;text-align:center;background:rgba(255,250,246,.97);border:1px solid rgba(147,76,37,.30);border-radius:19px;box-shadow:0 8px 20px rgba(91,33,13,.07)}
+#boxes .mini-kicker{display:inline-block;padding:5px 11px;border-radius:999px;background:#f1ddcf;color:#7a3518;font:700 10px/1 Arial,sans-serif;text-transform:uppercase;letter-spacing:.75px}
+#boxes .mini-discovery-panel h2,#boxes .mini-month-panel h2{margin:8px 0 2px;font:700 31px/1 Georgia,'Times New Roman',serif}
+#boxes .mini-price{font:700 22px/1 Georgia,'Times New Roman',serif;color:#8a3518;margin:8px 0}
+#boxes .mini-discovery-panel p{margin:8px auto 13px;font:400 14px/1.4 Georgia,'Times New Roman',serif;max-width:360px;color:#5f3929}
+#boxes .mini-order-note{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 22px;border-radius:999px;background:#7a2d13;color:#fff;font:700 13px/1 Arial,sans-serif}
+#boxes .mini-month-panel{margin-top:16px;padding:20px 14px 17px;border-radius:20px;background:linear-gradient(145deg,#642109 0%,#9c4c21 100%);color:#fff5ed;box-shadow:0 10px 24px rgba(80,25,7,.18)}
+#boxes .mini-month-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:6px}
+#boxes .mini-kicker.light{background:rgba(255,255,255,.15);color:#fff4ea}
+#boxes .mini-month-panel h2{color:#fff7f1;margin-top:7px;font-size:30px}
+#boxes .mini-price.light{color:#fff7f1;font-size:20px;white-space:nowrap}
+#boxes .mini-month-sub{margin:0 0 13px;font:400 13px/1.35 Georgia,'Times New Roman',serif;color:#f7e2d5}
+#boxes .gourmet-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#boxes .gourmet-card{background:#fff8f2;color:#4d1d0e;border-radius:14px;overflow:hidden;text-align:center}
+#boxes .gourmet-card img{width:100%;aspect-ratio:1.18/1;display:block;object-fit:cover}
+#boxes .gourmet-card h3{margin:8px 6px 4px;font:700 17px/1 Georgia,'Times New Roman',serif}
+#boxes .gourmet-card p{margin:0;padding:0 8px 11px;font:400 10.5px/1.28 Georgia,'Times New Roman',serif;color:#6d4432;min-height:50px}
+@media(min-width:460px){#boxes .mini-grid{grid-template-columns:repeat(3,1fr)}#boxes .mini-card p{font-size:11px}.gourmet-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
 </head><body><div id="app">
 <section id="home" class="screen active"><img class="art" fetchpriority="high" decoding="async" src="./cl-home.webp" alt="Accueil Cake Lab"><button class="hotspot" style="left:4.8%;top:35.0%;width:38.5%;height:5.7%" onclick="show('catalog')">Voir les cakes</button><button class="hotspot" style="left:4.8%;top:40.9%;width:38.5%;height:6.2%" onclick="show('boxes')">Voir les mini cakes</button><button class="hotspot" style="left:2%;top:4.2%;width:12%;height:6%" onclick="openDrawer()">Menu</button><button class="hotspot cart-hit" style="right:2%;top:4.2%;width:12%;height:6%" onclick="openCart()">Panier</button><div id="homeBadge" class="live-badge">0</div></section>
 <section id="catalog" class="screen"><img class="art" loading="eager" decoding="async" fetchpriority="high" src="./cl-catalogue.webp" alt="Nos cakes"><button class="hotspot" style="left:2%;top:1.1%;width:14%;height:6%" onclick="openDrawer()">Menu</button><button class="hotspot cart-hit" style="right:2%;top:1.1%;width:14%;height:6%" onclick="openCart()">Panier</button><div id="catalogBadge" class="live-badge">0</div>
 <button class="hotspot" style="left:3.7%;top:13.8%;width:42.3%;height:22.7%" onclick="choose('chocolate')">Cake Chocolat</button><button class="hotspot" style="left:48.2%;top:13.8%;width:42.4%;height:22.7%" onclick="choose('lemon')">Cake Citron</button><button class="hotspot" style="left:3.7%;top:37.45%;width:42.3%;height:22.3%" onclick="choose('coco')">Cake Coco</button><button class="hotspot" style="left:48.2%;top:37.45%;width:42.4%;height:22.3%" onclick="choose('vanilla')">Vanille</button><button class="hotspot" style="left:3.7%;top:60.25%;width:42.3%;height:21.25%" onclick="choose('mocha')">Mocha</button><button class="hotspot" style="left:48.2%;top:60.25%;width:42.4%;height:21.25%" onclick="choose('mango')">Mangue Vanille</button><button class="hotspot" style="left:3.0%;top:82.15%;width:92.5%;height:15.7%" onclick="choose('monthly')">Bissap Vanille</button></section>
-<section id="boxes" class="screen"><img class="art" loading="eager" decoding="async" fetchpriority="high" src="./cl-boxes.webp" alt="Nos box mini"><button class="hotspot" style="left:2%;top:1%;width:14%;height:7%" onclick="openDrawer()">Menu</button><button class="hotspot cart-hit" style="right:2%;top:1%;width:14%;height:7%" onclick="openCart()">Panier</button><div id="boxesBadge" class="live-badge">0</div><button class="hotspot" style="left:3.2%;top:22.8%;width:44%;height:36.4%" onclick="choose('box_exotic')">Box Exotique</button><button class="hotspot" style="left:49.2%;top:22.8%;width:44%;height:36.4%" onclick="choose('box_douceur')">Box Douceur</button><button class="hotspot" style="left:3.2%;top:59.7%;width:44%;height:35.8%" onclick="choose('box_gourmande')">Box Gourmande</button><button class="hotspot" style="left:49.2%;top:59.7%;width:44%;height:35.8%" onclick="choose('box_teranga')">Box Teranga</button></section>
+<section id="boxes" class="screen mini-page">
+  <header class="mini-header">
+    <button class="mini-icon-btn" type="button" onclick="openDrawer()" aria-label="Ouvrir le menu">☰</button>
+    <div class="mini-brand"><strong>CAKE LAB</strong><span>Cakes artisanaux sur commande</span></div>
+    <button class="mini-icon-btn mini-cart-btn" type="button" onclick="openCart()" aria-label="Ouvrir le panier">♡</button>
+    <div id="boxesBadge" class="live-badge">0</div>
+  </header>
+  <div class="mini-content">
+    <div class="mini-title-block">
+      <h1>Nos mini-cakes</h1>
+      <p>Des mini-cakes ultra moelleux, aux mêmes saveurs que nos grands cakes, entièrement nappés de leur crème pour un rendu gourmand et fondant.</p>
+    </div>
+
+    <div class="mini-grid" aria-label="Saveurs de mini-cakes">
+      <article class="mini-card"><img src="./cl-mini-chocolat.webp" alt="Mini-cake Chocolat"><div class="mini-card-copy"><h2>Chocolat</h2><p>Crème chocolat et quelques copeaux fins.</p></div></article>
+      <article class="mini-card"><img src="./cl-mini-mangue.webp" alt="Mini-cake Mangue Vanille"><div class="mini-card-copy"><h2>Mangue Vanille</h2><p>Crème mangue douce et parfumée, sans topping.</p></div></article>
+      <article class="mini-card"><img src="./cl-mini-vanille.webp" alt="Mini-cake Vanille Intense"><div class="mini-card-copy"><h2>Vanille Intense</h2><p>Crème vanille intense, lisse et généreuse.</p></div></article>
+      <article class="mini-card"><img src="./cl-mini-coco.webp" alt="Mini-cake Coco"><div class="mini-card-copy"><h2>Coco</h2><p>Crème coco et coco râpée grillée.</p></div></article>
+      <article class="mini-card"><img src="./cl-mini-citron.webp" alt="Mini-cake Citron"><div class="mini-card-copy"><h2>Citron</h2><p>Crème citron avec de fins zestes jaunes et verts.</p></div></article>
+      <article class="mini-card"><img src="./cl-mini-mocha.webp" alt="Mini-cake Mocha Café"><div class="mini-card-copy"><h2>Mocha Café</h2><p>Crème moka café foncée et cacao non sucré.</p></div></article>
+    </div>
+
+    <section class="mini-discovery-panel">
+      <span class="mini-kicker">Format découverte</span>
+      <h2>Box Découverte</h2>
+      <div class="mini-price">12 000 F</div>
+      <p><strong>4 mini-cakes au choix</strong> parmi nos six saveurs classiques.</p>
+      <div class="mini-order-note">Disponible sur commande</div>
+    </section>
+
+    <section class="mini-month-panel">
+      <div class="mini-month-head"><div><span class="mini-kicker light">Édition d’octobre</span><h2>Box Gourmande</h2></div><div class="mini-price light">12 000 F</div></div>
+      <p class="mini-month-sub">4 mini-cakes gourmands aux saveurs du mois.</p>
+      <div class="gourmet-grid">
+        <article class="gourmet-card"><img src="./cl-mini-kinder.webp" alt="Mini-cake Kinder"><h3>Kinder</h3><p>Crème de Kinder barre fondue, avec un petit morceau de Kinder.</p></article>
+        <article class="gourmet-card"><img src="./cl-mini-dulce.webp" alt="Mini-cake Dulce de leche"><h3>Dulce de leche</h3><p>Crème dulce de leche, lisse et sans topping.</p></article>
+        <article class="gourmet-card"><img src="./cl-mini-pistache.webp" alt="Mini-cake Pistache"><h3>Pistache</h3><p>Crème pistache et quelques pistaches concassées.</p></article>
+        <article class="gourmet-card"><img src="./cl-mini-creme-brulee.webp" alt="Mini-cake Crème brûlée"><h3>Crème brûlée</h3><p>Crème brûlée onctueuse et finition légèrement caramélisée.</p></article>
+      </div>
+    </section>
+  </div>
+</section>
 <section id="checkout" class="screen"><div class="checkout-canvas"><img id="checkoutArt" decoding="async" alt="Votre commande Cake Lab"><button class="hotspot menu-hit" onclick="openDrawer()">Menu</button><button class="hotspot cart-hit bag-hit" onclick="openCart()">Panier</button><div id="checkoutBadge" class="live-badge is-empty">1</div><button class="qty-hit qty-minus" onclick="changeQty(-1)" aria-label="Retirer un article">−</button><div id="qtyLive" class="qty-live is-one">1</div><button class="qty-hit qty-plus" onclick="changeQty(1)" aria-label="Ajouter un article">+</button>
 <input id="lastName" class="order-field" aria-label="Nom" autocomplete="family-name"><input id="firstName" class="order-field" aria-label="Prénom" autocomplete="given-name"><input id="phone" class="order-field" aria-label="Numéro de téléphone / WhatsApp" inputmode="tel" autocomplete="tel"><input id="address" class="order-field" aria-label="Adresse de livraison" autocomplete="street-address"><select id="zone" class="order-field"><option value="">Sélectionnez votre zone</option><option value="Plateau">Plateau — 1 000 F</option><option value="Point E">Point E — 2 000 F</option><option value="Mermoz">Mermoz — 2 500 F</option><option value="Fann">Fann — 3 000 F</option><option value="Ouakam">Ouakam — 3 000 F</option><option value="Ngor">Ngor — 3 000 F</option><option value="Almadies">Almadies — 3 000 F</option></select><input id="deliveryDate" class="order-field" type="date"><select id="timeSlot" class="order-field"><option value="">Sélectionnez un créneau</option><option>09h00 - 11h00</option><option>11h00 - 13h00</option><option>14h00 - 16h00</option><option>16h00 - 18h00</option><option>18h00 - 20h00</option></select><button class="time-open-hit" type="button" onclick="openTimeSlot()" aria-label="Choisir une plage horaire">Plage horaire</button><input id="topper" type="checkbox"><div id="topperMark" class="topper-mark hidden">✓</div><div class="payment-selector" id="paymentSelector" aria-label="Mode de paiement">
 <button type="button" id="payCash" class="pay-choice selected" onclick="setPaymentMethod('cash')" aria-pressed="true">
@@ -618,7 +701,7 @@
 </button>
 </div><button class="validate-hit" onclick="prepareOrder()">Valider ma commande</button></div></section>
 </div>
-<div id="drawerBg" class="drawer-bg" onclick="if(event.target===this)closeDrawer()"><aside class="drawer"><button class="close" onclick="closeDrawer()">×</button><h2>Cake Lab</h2><button onclick="show('home');closeDrawer()">Accueil</button><button onclick="show('catalog');closeDrawer()">Nos cakes</button><button onclick="show('boxes');closeDrawer()">Nos box mini</button><button onclick="openCart();closeDrawer()">Mon panier</button></aside></div>
+<div id="drawerBg" class="drawer-bg" onclick="if(event.target===this)closeDrawer()"><aside class="drawer"><button class="close" onclick="closeDrawer()">×</button><h2>Cake Lab</h2><button onclick="show('home');closeDrawer()">Accueil</button><button onclick="show('catalog');closeDrawer()">Nos cakes</button><button onclick="show('boxes');closeDrawer()">Nos mini-cakes</button><button onclick="openCart();closeDrawer()">Mon panier</button></aside></div>
 <div id="modalBg" class="modal-bg" onclick="if(event.target===this)closeModal()"><div id="sheet" class="sheet"></div></div><div id="toast" class="toast"></div>
 <script>
 const ART={"chocolate": "./cl-chocolat.webp", "lemon": "./cl-citron.webp", "coco": "./cl-coco.webp", "vanilla": "./cl-vanille.webp", "mocha": "./cl-moka.webp", "mango": "./cl-mangue.webp", "monthly": "./cl-bissap.webp", "box_exotic": "./cl-box-exotique.webp", "box_douceur": "./cl-box-douceur.webp", "box_gourmande": "./cl-box-gourmande.webp", "box_teranga": "./cl-box-teranga.webp"};
