@@ -977,4 +977,88 @@ setPaymentMethod('cash');updateBadges();
 })();
 </script>
 
+
+<style id="cake-lab-dynamic-copy-fix">
+#catalog .cl-dyn-copy-chocolate{
+  position:absolute;z-index:44;pointer-events:none;
+  left:5.55%;top:27.18%;width:39.75%;height:5.02%;
+  box-sizing:border-box;overflow:hidden;background:#fff;
+  color:#1e100c;padding:.10% .25% .05%;
+}
+#catalog .cl-dyn-copy-chocolate .cl-dyn-name{
+  font-family:Georgia,'Times New Roman',serif;
+  font-size:3.48vw;line-height:1.02;font-weight:700;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  margin:0 0 .32em 0;
+}
+#catalog .cl-dyn-copy-chocolate .cl-dyn-desc{
+  font-family:Georgia,'Times New Roman',serif;
+  font-size:2.54vw;line-height:1.08;font-weight:400;
+  margin:0;display:-webkit-box;-webkit-box-orient:vertical;
+  -webkit-line-clamp:2;overflow:hidden;
+}
+@media(min-width:700px){
+  #catalog .cl-dyn-copy-chocolate .cl-dyn-name{font-size:19px}
+  #catalog .cl-dyn-copy-chocolate .cl-dyn-desc{font-size:14px}
+}
+</style>
+<script id="cake-lab-dynamic-copy-fix-js">
+(function(){
+  const SUPABASE_URL='https://mjcoidbfmzlqxvrnyayd.supabase.co';
+  const SUPABASE_KEY='sb_publishable_DcjUuH5aWrkAcXTw-02xZg_wZfd9wy3';
+
+  function ensureBox(){
+    const catalog=document.getElementById('catalog');
+    if(!catalog)return null;
+    let box=catalog.querySelector('.cl-dyn-copy-chocolate');
+    if(!box){
+      box=document.createElement('div');
+      box.className='cl-dyn-copy-chocolate';
+      box.innerHTML='<div class="cl-dyn-name"></div><div class="cl-dyn-desc"></div>';
+      catalog.appendChild(box);
+    }
+    return box;
+  }
+
+  async function refreshChocolateCopy(){
+    const box=ensureBox();
+    if(!box)return;
+    let row=null;
+    try{
+      const r=await fetch(`${SUPABASE_URL}/rest/v1/products?select=id,name,description&id=eq.chocolat&limit=1`,{
+        headers:{apikey:SUPABASE_KEY,Accept:'application/json'},cache:'no-store'
+      });
+      if(r.ok){const rows=await r.json();row=rows&&rows[0]||null;}
+    }catch(e){console.warn('Cake Lab: texte chocolat non synchronisé',e);}
+
+    let name=((row&&row.name)||'Cake Chocolat Duo').trim();
+    if(!name || /^cake chocolat$/i.test(name))name='Cake Chocolat Duo';
+    const desc=((row&&row.description)||'Tout le fondant du chocolat intense.').trim();
+
+    box.querySelector('.cl-dyn-name').textContent=name;
+    box.querySelector('.cl-dyn-desc').textContent=desc;
+
+    const hot=[...document.querySelectorAll('#catalog button.hotspot')].find(b=>
+      ((b.getAttribute('onclick')||'').includes("choose('chocolate')"))
+    );
+    if(hot){hot.textContent=name;hot.setAttribute('aria-label',name);}
+
+    try{
+      if(typeof PRODUCTS!=='undefined'&&PRODUCTS.chocolate){
+        PRODUCTS.chocolate.name=name;
+        PRODUCTS.chocolate.description=desc;
+      }
+    }catch(e){}
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',refreshChocolateCopy);
+  else refreshChocolateCopy();
+  setTimeout(refreshChocolateCopy,800);
+  setTimeout(refreshChocolateCopy,2200);
+  window.addEventListener('focus',refreshChocolateCopy);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshChocolateCopy();});
+  setInterval(refreshChocolateCopy,30000);
+})();
+</script>
+
 </body></html>
