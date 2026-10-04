@@ -218,15 +218,26 @@ function playOrderSound(){
     if(!audioCtx)return;
     if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});
     const now=audioCtx.currentTime;
-    [[0,740],[0.16,988],[0.34,740]].forEach(([delay,freq])=>{
+    // Son de nouvelle commande volontairement plus fort et plus long.
+    // La puissance finale dépend quand même du volume multimédia du téléphone.
+    const notes=[
+      [0.00,784,'triangle',0.75,0.22],
+      [0.22,1047,'triangle',0.82,0.26],
+      [0.50,1319,'sine',0.86,0.30],
+      [0.95,784,'triangle',0.75,0.22],
+      [1.17,1047,'triangle',0.82,0.26],
+      [1.45,1319,'sine',0.86,0.38]
+    ];
+    notes.forEach(([delay,freq,type,level,duration])=>{
       const o=audioCtx.createOscillator(),g=audioCtx.createGain();
-      o.type='sine';o.frequency.value=freq;
+      o.type=type;o.frequency.value=freq;
       g.gain.setValueAtTime(0.0001,now+delay);
-      g.gain.exponentialRampToValueAtTime(0.22,now+delay+0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001,now+delay+0.14);
-      o.connect(g);g.connect(audioCtx.destination);o.start(now+delay);o.stop(now+delay+0.16);
+      g.gain.exponentialRampToValueAtTime(level,now+delay+0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001,now+delay+duration);
+      o.connect(g);g.connect(audioCtx.destination);
+      o.start(now+delay);o.stop(now+delay+duration+0.02);
     });
-    if(navigator.vibrate)navigator.vibrate([180,80,180]);
+    if(navigator.vibrate)navigator.vibrate([260,100,260,100,420]);
   }catch(e){}
 }
 
@@ -249,15 +260,15 @@ function startOrderWatcher(){
 }
 
 const seed=[
-{id:'chocolat',category:'cake',name:'Cake Chocolat',description:'Chocolat intense et ultra moelleux.',price:10000,image:'cl-chocolat.webp',active:true,isNew:false,isMonth:false,order:1},
+{id:'chocolat',category:'cake',name:'Cake Chocolat Duo',description:'Chocolat au lait et chocolat blanc, ultra moelleux.',price:10000,image:'cl-chocolat.webp',active:true,isNew:false,isMonth:false,order:1},
 {id:'citron',category:'cake',name:'Cake Citron',description:'Citron frais et moelleux pour une explosion de saveurs.',price:10000,image:'cl-citron.webp',active:true,isNew:false,isMonth:false,order:2},
 {id:'coco',category:'cake',name:'Cake Coco',description:'Un cake moelleux aux notes délicates de coco.',price:10000,image:'cl-coco.webp',active:true,isNew:false,isMonth:false,order:3},
 {id:'moka',category:'cake',name:'Cake Moka Café',description:'Délicieux mélange de café intense et de saveurs gourmandes.',price:10000,image:'cl-moka.webp',active:true,isNew:false,isMonth:false,order:4},
 {id:'mangue',category:'cake',name:'Cake Mangue Vanille',description:'Alliance parfaite entre la mangue fruitée et la vanille douce.',price:10000,image:'cl-mangue.webp',active:true,isNew:false,isMonth:false,order:5},
 {id:'vanille',category:'cake',name:'Cake Vanille',description:'Vanille intense et moelleux incomparable.',price:10000,image:'cl-vanille.webp',active:true,isNew:false,isMonth:false,order:6},
-{id:'bissap',category:'cake',name:'Cake Bissap Vanille',description:'L’alliance fleurie du bissap et de la vanille, un goût unique.',price:11000,image:'cl-bissap.webp',active:true,isNew:true,isMonth:true,order:7},
+{id:'bissap',category:'cake',name:'Cake Bissap Vanille',description:'L’alliance fleurie du bissap et de la vanille, un goût unique.',price:10500,image:'cl-bissap.webp',active:true,isNew:true,isMonth:true,order:7},
 {id:'teranga',category:'box',name:'Box Teranga',description:'4 mini cakes : Bissap Vanille, Guerté, Bouye Vanille et Gingembre Vanille.',price:12000,image:'cl-box-teranga.webp',active:true,isNew:false,isMonth:false,order:8},
-{id:'gourmande',category:'box',name:'Box Gourmande',description:'4 mini cakes gourmands.',price:12000,image:'cl-box-gourmande.webp',active:true,isNew:false,isMonth:false,order:9},
+{id:'gourmande',category:'box',name:'Box Gourmande',description:'Kinder, Dulce de leche, Pistache et Crème brûlée.',price:16000,image:'cl-box-gourmande.webp',active:true,isNew:false,isMonth:false,order:9},
 {id:'douceur',category:'box',name:'Box Douceur',description:'4 mini cakes : Chocolat, Mocha Café, Vanille et Coco.',price:12000,image:'cl-box-douceur.webp',active:true,isNew:false,isMonth:false,order:10},
 {id:'exotique',category:'box',name:'Box Exotique',description:'4 mini cakes : Citron, Mangue Vanille, Coco et Vanille.',price:12000,image:'cl-box-exotique.webp',active:true,isNew:false,isMonth:false,order:11}
 ];
