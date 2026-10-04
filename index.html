@@ -662,8 +662,56 @@
 </style>
 </head><body><div id="app">
 <section id="home" class="screen active"><img class="art" fetchpriority="high" decoding="async" src="./cl-home.webp" alt="Accueil Cake Lab"><button class="hotspot" style="left:4.8%;top:35.0%;width:38.5%;height:5.7%" onclick="show('catalog')">Voir les cakes</button><button class="hotspot" style="left:4.8%;top:40.9%;width:38.5%;height:6.2%" onclick="show('boxes')">Voir les mini cakes</button><button class="hotspot" style="left:2%;top:4.2%;width:12%;height:6%" onclick="openDrawer()">Menu</button><button class="hotspot cart-hit" style="right:2%;top:4.2%;width:12%;height:6%" onclick="openCart()">Panier</button><div id="homeBadge" class="live-badge">0</div></section>
-<section id="catalog" class="screen"><img class="art" loading="eager" decoding="async" fetchpriority="high" src="./cl-catalogue.webp" alt="Nos cakes"><button class="hotspot" style="left:2%;top:1.1%;width:14%;height:6%" onclick="openDrawer()">Menu</button><button class="hotspot cart-hit" style="right:2%;top:1.1%;width:14%;height:6%" onclick="openCart()">Panier</button><div id="catalogBadge" class="live-badge">0</div>
-<button class="hotspot" style="left:3.7%;top:13.8%;width:42.3%;height:22.7%" onclick="choose('chocolate')">Cake Chocolat</button><button class="hotspot" style="left:48.2%;top:13.8%;width:42.4%;height:22.7%" onclick="choose('lemon')">Cake Citron</button><button class="hotspot" style="left:3.7%;top:37.45%;width:42.3%;height:22.3%" onclick="choose('coco')">Cake Coco</button><button class="hotspot" style="left:48.2%;top:37.45%;width:42.4%;height:22.3%" onclick="choose('vanilla')">Vanille</button><button class="hotspot" style="left:3.7%;top:60.25%;width:42.3%;height:21.25%" onclick="choose('mocha')">Mocha</button><button class="hotspot" style="left:48.2%;top:60.25%;width:42.4%;height:21.25%" onclick="choose('mango')">Mangue Vanille</button><button class="hotspot" style="left:3.0%;top:82.15%;width:92.5%;height:15.7%" onclick="choose('monthly')">Bissap Vanille</button></section>
+<section id="catalog" class="screen catalog-v2">
+  <div class="catalog-shell">
+    <header class="catalog-header">
+      <button class="catalog-icon-btn catalog-menu-btn" type="button" onclick="openDrawer()" aria-label="Ouvrir le menu">☰</button>
+      <div class="catalog-brand">
+        <div class="catalog-logo">CAKE LAB <span>♡</span></div>
+        <div class="catalog-tagline">CAKES ARTISANAUX SUR COMMANDE</div>
+      </div>
+      <button class="catalog-icon-btn catalog-cart-btn" type="button" onclick="openCart()" aria-label="Ouvrir le panier">🛍️<span id="catalogBadge" class="live-badge">0</span></button>
+    </header>
+
+    <div class="catalog-title-block">
+      <p class="catalog-eyebrow">Notre collection</p>
+      <h1>Nos cakes</h1>
+      <p>Choisissez votre gourmandise</p>
+    </div>
+
+    <div id="catalogCards" class="catalog-cards">
+      <article class="cake-card" data-cake-id="chocolate">
+        <div class="cake-card-photo"><img data-role="image" src="./cl-chocolat.webp" alt="Cake Chocolat Duo"></div>
+        <div class="cake-card-body"><h2 data-role="name">Cake Chocolat Duo</h2><p data-role="desc">Un cake ultra moelleux au chocolat, nappé d’un duo gourmand chocolat et chocolat blanc.</p><div class="cake-card-bottom"><strong data-role="price">10 000 F</strong><button type="button" onclick="choose('chocolate')">Commander</button></div></div>
+      </article>
+      <article class="cake-card reverse" data-cake-id="lemon">
+        <div class="cake-card-photo"><img data-role="image" src="./cl-citron.webp" alt="Cake Citron"></div>
+        <div class="cake-card-body"><h2 data-role="name">Cake Citron</h2><p data-role="desc">La fraîcheur du citron, avec une crème au citron et des zestes de citron vert et jaune.</p><div class="cake-card-bottom"><strong data-role="price">10 000 F</strong><button type="button" onclick="choose('lemon')">Commander</button></div></div>
+      </article>
+      <article class="cake-card" data-cake-id="coco">
+        <div class="cake-card-photo"><img data-role="image" src="./cl-coco.webp" alt="Cake Coco"></div>
+        <div class="cake-card-body"><h2 data-role="name">Cake Coco</h2><p data-role="desc">Un cake ultra moelleux à la coco, avec une crème douce et une touche de coco râpée grillée.</p><div class="cake-card-bottom"><strong data-role="price">10 000 F</strong><button type="button" onclick="choose('coco')">Commander</button></div></div>
+      </article>
+      <article class="cake-card reverse" data-cake-id="vanilla">
+        <div class="cake-card-photo"><img data-role="image" src="./cl-vanille.webp" alt="Vanille Intense"></div>
+        <div class="cake-card-body"><h2 data-role="name">Vanille Intense</h2><p data-role="desc">Une vanille généreuse et parfumée, avec une crème vanille douce et gourmande.</p><div class="cake-card-bottom"><strong data-role="price">10 000 F</strong><button type="button" onclick="choose('vanilla')">Commander</button></div></div>
+      </article>
+      <article class="cake-card" data-cake-id="mocha">
+        <div class="cake-card-photo"><img data-role="image" src="./cl-moka.webp" alt="Mocha Café"></div>
+        <div class="cake-card-body"><h2 data-role="name">Mocha Café</h2><p data-role="desc">L’alliance du café et du chocolat, avec une légère touche de cacao.</p><div class="cake-card-bottom"><strong data-role="price">10 000 F</strong><button type="button" onclick="choose('mocha')">Commander</button></div></div>
+      </article>
+      <article class="cake-card reverse" data-cake-id="mango">
+        <div class="cake-card-photo"><img data-role="image" src="./cl-mangue.webp" alt="Mangue Vanille"></div>
+        <div class="cake-card-body"><h2 data-role="name">Mangue Vanille</h2><p data-role="desc">La douceur exotique de la mangue relevée par une délicate touche de vanille.</p><div class="cake-card-bottom"><strong data-role="price">10 500 F</strong><button type="button" onclick="choose('mango')">Commander</button></div></div>
+      </article>
+      <article class="cake-card cake-card-month" data-cake-id="monthly">
+        <div class="cake-month-label">CAKE DU MOIS · ÉDITION D’OCTOBRE</div>
+        <div class="cake-card-photo"><img data-role="image" src="./cl-bissap.webp" alt="Bissap Vanille"></div>
+        <div class="cake-card-body"><h2 data-role="name">Bissap Vanille</h2><p data-role="desc">Une création éphémère autour du bissap et de la vanille, à découvrir ce mois-ci.</p><div class="cake-card-bottom"><strong data-role="price">11 500 F</strong><button type="button" onclick="choose('monthly')">Commander</button></div></div>
+      </article>
+    </div>
+  </div>
+</section>
 <section id="boxes" class="screen mini-page">
   <div class="mini-approved-wrap">
     <img class="mini-approved-art" src="./cl-mini-interface.webp" alt="Nos mini-cakes Cake Lab">
@@ -707,7 +755,7 @@ if(document.readyState==='complete'){
   window.addEventListener('load',()=>setTimeout(preloadCakeLabArtwork,150),{once:true});
 }
 
-const PRODUCTS={"chocolate": {"name": "Cake Chocolat", "price": 10000, "type": "cake"}, "lemon": {"name": "Cake Citron", "price": 10000, "type": "cake"}, "coco": {"name": "Cake Coco", "price": 10000, "type": "cake"}, "vanilla": {"name": "Cake Vanille", "price": 10000, "type": "cake"}, "mocha": {"name": "Cake Mocha Café", "price": 10000, "type": "cake"}, "mango": {"name": "Cake Mangue Vanille", "price": 10000, "type": "cake"}, "monthly": {"name": "Cake Bissap Vanille", "price": 11000, "type": "cake"}, "box_exotic": {"name": "Box Exotique", "price": 12000, "type": "box"}, "box_douceur": {"name": "Box Découverte", "price": 12000, "type": "box"}, "box_gourmande": {"name": "Box Gourmande d’octobre", "price": 12000, "type": "box"}, "box_teranga": {"name": "Box Teranga", "price": 12000, "type": "box"}};
+const PRODUCTS={"chocolate": {"name": "Cake Chocolat Duo", "price": 10000, "type": "cake"}, "lemon": {"name": "Cake Citron", "price": 10000, "type": "cake"}, "coco": {"name": "Cake Coco", "price": 10000, "type": "cake"}, "vanilla": {"name": "Vanille Intense", "price": 10000, "type": "cake"}, "mocha": {"name": "Mocha Café", "price": 10000, "type": "cake"}, "mango": {"name": "Mangue Vanille", "price": 10500, "type": "cake"}, "monthly": {"name": "Bissap Vanille", "price": 11500, "type": "cake"}, "box_exotic": {"name": "Box Exotique", "price": 12000, "type": "box"}, "box_douceur": {"name": "Box Découverte", "price": 12000, "type": "box"}, "box_gourmande": {"name": "Box Gourmande d’octobre", "price": 16000, "type": "box"}, "box_teranga": {"name": "Box Teranga", "price": 12000, "type": "box"}};
 const FEES={'Plateau':1000,'Point E':2000,'Mermoz':2500,'Fann':3000,'Ouakam':3000,'Ngor':3000,'Almadies':3000};
 let cart=JSON.parse(localStorage.getItem('cakeLabFinalCart')||'[]');let current=null;let topperMessage='';let paymentMethod='cash';const WAVE_LINK='https://qr.wave.com/iVVNfc25fSy10Nk1tUTJYQzB6/BqvEQ5/A5B5dD/p';
 const $=id=>document.getElementById(id);const money=n=>new Intl.NumberFormat('fr-FR').format(n)+' F';
@@ -1059,6 +1107,116 @@ setPaymentMethod('cash');updateBadges();
   window.addEventListener('focus',refreshChocolateCopy);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshChocolateCopy();});
   setInterval(refreshChocolateCopy,30000);
+})();
+</script>
+
+
+<style id="cake-lab-catalog-v2-style">
+/* Catalogue standard V2 : mise en page en cartes verticales. La page mini-cakes n'est pas modifiée. */
+#catalog.catalog-v2{background:#fbf5ef;min-height:100vh;color:#2b160f;}
+#catalog.catalog-v2 .catalog-shell{position:relative;min-height:100vh;padding:0 18px 30px;overflow:hidden;background:
+ radial-gradient(circle at 8% 18%,rgba(214,155,94,.10),transparent 22%),
+ radial-gradient(circle at 93% 44%,rgba(91,33,13,.06),transparent 18%),
+ #fbf5ef;}
+#catalog.catalog-v2 .catalog-header{height:92px;display:grid;grid-template-columns:48px 1fr 48px;align-items:center;gap:8px;border-bottom:1px solid rgba(91,33,13,.14);position:relative;z-index:5}
+#catalog.catalog-v2 .catalog-brand{text-align:center;line-height:1}
+#catalog.catalog-v2 .catalog-logo{font:700 clamp(24px,7vw,36px)/1 Georgia,'Times New Roman',serif;letter-spacing:.035em;color:#21110c;white-space:nowrap}
+#catalog.catalog-v2 .catalog-logo span{font-family:Arial,sans-serif;color:#d97920;font-weight:400;margin-left:3px}
+#catalog.catalog-v2 .catalog-tagline{font:700 clamp(6px,1.9vw,9px)/1.2 Arial,sans-serif;letter-spacing:.23em;color:#6b4435;margin-top:7px;white-space:nowrap}
+#catalog.catalog-v2 .catalog-icon-btn{position:relative;width:44px;height:44px;border:0;background:transparent;color:#2e1a13;font-size:27px;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#catalog.catalog-v2 .catalog-cart-btn{font-size:23px}
+#catalog.catalog-v2 #catalogBadge{position:absolute!important;right:-1px!important;top:-2px!important;width:20px!important;min-width:20px!important;height:20px!important;line-height:20px!important;font:700 11px/20px Arial,sans-serif!important;background:#5b210d!important;color:#fff!important;border-radius:50%!important;box-shadow:0 1px 3px rgba(0,0,0,.14)!important;display:block!important}
+#catalog.catalog-v2 #catalogBadge.is-empty{display:none!important}
+#catalog.catalog-v2 .catalog-title-block{text-align:center;padding:25px 8px 20px}
+#catalog.catalog-v2 .catalog-eyebrow{margin:0 0 4px;text-transform:uppercase;letter-spacing:.18em;font:700 10px/1.2 Arial,sans-serif;color:#a66a37}
+#catalog.catalog-v2 .catalog-title-block h1{font:700 clamp(37px,10vw,54px)/.98 Georgia,'Times New Roman',serif;margin:0;color:#1f100b}
+#catalog.catalog-v2 .catalog-title-block>p:last-child{font:400 16px/1.3 Georgia,'Times New Roman',serif;margin:7px 0 0;color:#684738}
+#catalog.catalog-v2 .catalog-cards{display:flex;flex-direction:column;gap:13px;position:relative;z-index:2}
+#catalog.catalog-v2 .cake-card{display:grid;grid-template-columns:48% 52%;min-height:174px;background:#fffaf6;border:1px solid rgba(91,33,13,.11);border-radius:20px;overflow:hidden;box-shadow:0 8px 20px rgba(76,39,23,.07);position:relative}
+#catalog.catalog-v2 .cake-card.reverse{grid-template-columns:52% 48%}
+#catalog.catalog-v2 .cake-card.reverse .cake-card-photo{order:2}
+#catalog.catalog-v2 .cake-card.reverse .cake-card-body{order:1}
+#catalog.catalog-v2 .cake-card-photo{min-width:0;min-height:174px;background:#f5ebe3;overflow:hidden}
+#catalog.catalog-v2 .cake-card-photo img{width:100%;height:100%;min-height:174px;display:block;object-fit:cover;object-position:center}
+#catalog.catalog-v2 .cake-card-body{padding:15px 14px 13px;display:flex;flex-direction:column;min-width:0;background:rgba(255,250,246,.98)}
+#catalog.catalog-v2 .cake-card-body h2{font:700 clamp(20px,5.5vw,28px)/1.02 Georgia,'Times New Roman',serif;margin:0 0 7px;color:#26120c;overflow-wrap:anywhere}
+#catalog.catalog-v2 .cake-card-body p{font:400 clamp(11px,2.85vw,14px)/1.26 Georgia,'Times New Roman',serif;margin:0 0 12px;color:#664536;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
+#catalog.catalog-v2 .cake-card-bottom{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px}
+#catalog.catalog-v2 .cake-card-bottom strong{font:700 clamp(17px,4.6vw,23px)/1 Georgia,'Times New Roman',serif;color:#24120c;white-space:nowrap}
+#catalog.catalog-v2 .cake-card-bottom button{border:0;border-radius:999px;background:#68270f;color:white;padding:9px 13px;font:700 clamp(10px,2.7vw,13px)/1 Arial,sans-serif;cursor:pointer;white-space:nowrap;box-shadow:0 3px 8px rgba(91,33,13,.16)}
+#catalog.catalog-v2 .cake-card-bottom button:active{transform:scale(.98)}
+#catalog.catalog-v2 .cake-card-month{display:grid;grid-template-columns:45% 55%;min-height:192px;border:1.5px solid rgba(180,112,42,.35);background:linear-gradient(135deg,#fff9f3,#f9eadb);padding-top:27px}
+#catalog.catalog-v2 .cake-card-month .cake-month-label{position:absolute;left:0;right:0;top:0;height:28px;display:flex;align-items:center;justify-content:center;background:#6a2a12;color:#fff6ef;font:700 9px/1 Arial,sans-serif;letter-spacing:.14em}
+#catalog.catalog-v2 .cake-card-month .cake-card-photo{min-height:165px}
+#catalog.catalog-v2 .cake-card-month .cake-card-photo img{min-height:165px}
+/* Désactive les anciens calques du catalogue illustré : plus aucune superposition possible. */
+#catalog.catalog-v2>.art,#catalog.catalog-v2>.hotspot,#catalog.catalog-v2>.cl-admin-catalog-image,#catalog.catalog-v2>.cl-dyn-price,#catalog.catalog-v2>.cl-dyn-copy-chocolate{display:none!important}
+@media(max-width:390px){
+ #catalog.catalog-v2 .catalog-shell{padding-left:11px;padding-right:11px}
+ #catalog.catalog-v2 .catalog-header{grid-template-columns:42px 1fr 42px;height:82px}
+ #catalog.catalog-v2 .catalog-icon-btn{width:40px;height:40px}
+ #catalog.catalog-v2 .cake-card{grid-template-columns:47% 53%;min-height:164px}
+ #catalog.catalog-v2 .cake-card.reverse{grid-template-columns:53% 47%}
+ #catalog.catalog-v2 .cake-card-photo,#catalog.catalog-v2 .cake-card-photo img{min-height:164px}
+ #catalog.catalog-v2 .cake-card-body{padding:12px 10px 11px}
+ #catalog.catalog-v2 .cake-card-body h2{font-size:19px}
+ #catalog.catalog-v2 .cake-card-body p{font-size:11px;-webkit-line-clamp:4}
+ #catalog.catalog-v2 .cake-card-bottom strong{font-size:16px}
+ #catalog.catalog-v2 .cake-card-bottom button{padding:8px 10px;font-size:10px}
+}
+</style>
+<script id="cake-lab-catalog-v2-js">
+(function(){
+  const SUPABASE_URL='https://mjcoidbfmzlqxvrnyayd.supabase.co';
+  const SUPABASE_KEY='sb_publishable_DcjUuH5aWrkAcXTw-02xZg_wZfd9wy3';
+  const BUCKET='product-images';
+  const MAP={chocolat:'chocolate',citron:'lemon',coco:'coco',vanille:'vanilla',moka:'mocha',mangue:'mango',bissap:'monthly'};
+  const FALLBACK={
+    chocolate:{name:'Cake Chocolat Duo',desc:'Un cake ultra moelleux au chocolat, nappé d’un duo gourmand chocolat et chocolat blanc.',price:10000,img:'./cl-chocolat.webp'},
+    lemon:{name:'Cake Citron',desc:'La fraîcheur du citron, avec une crème au citron et des zestes de citron vert et jaune.',price:10000,img:'./cl-citron.webp'},
+    coco:{name:'Cake Coco',desc:'Un cake ultra moelleux à la coco, avec une crème douce et une touche de coco râpée grillée.',price:10000,img:'./cl-coco.webp'},
+    vanilla:{name:'Vanille Intense',desc:'Une vanille généreuse et parfumée, avec une crème vanille douce et gourmande.',price:10000,img:'./cl-vanille.webp'},
+    mocha:{name:'Mocha Café',desc:'L’alliance du café et du chocolat, avec une légère touche de cacao.',price:10000,img:'./cl-moka.webp'},
+    mango:{name:'Mangue Vanille',desc:'La douceur exotique de la mangue relevée par une délicate touche de vanille.',price:10500,img:'./cl-mangue.webp'},
+    monthly:{name:'Bissap Vanille',desc:'Une création éphémère autour du bissap et de la vanille, à découvrir ce mois-ci.',price:11500,img:'./cl-bissap.webp'}
+  };
+  const fmt=n=>new Intl.NumberFormat('fr-FR').format(Number(n)||0)+' F';
+  function imageUrl(row,id){
+    const full=(row&&row.image_url||'').trim(); if(full)return full;
+    const path=(row&&row.image_path||'').trim();
+    if(path && !/^cl-[\w-]+\.(?:png|webp|jpe?g)$/i.test(path)){
+      return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${path.split('/').map(encodeURIComponent).join('/')}`;
+    }
+    return FALLBACK[id].img;
+  }
+  function renderOne(id,row){
+    const card=document.querySelector(`#catalog .cake-card[data-cake-id="${id}"]`); if(!card)return;
+    const fb=FALLBACK[id];
+    let name=((row&&row.name)||fb.name).trim();
+    if(id==='chocolate' && (!name || /^cake chocolat$/i.test(name))) name='Cake Chocolat Duo';
+    const desc=((row&&row.description)||fb.desc).trim();
+    const price=(row&&row.price!==null&&row.price!==undefined&&!Number.isNaN(Number(row.price)))?Number(row.price):fb.price;
+    const active=!row || row.active!==false;
+    const img=imageUrl(row,id);
+    const nameEl=card.querySelector('[data-role="name"]'),descEl=card.querySelector('[data-role="desc"]'),priceEl=card.querySelector('[data-role="price"]'),imgEl=card.querySelector('[data-role="image"]');
+    if(nameEl)nameEl.textContent=name;if(descEl)descEl.textContent=desc;if(priceEl)priceEl.textContent=fmt(price);
+    if(imgEl){imgEl.alt=name;if(imgEl.dataset.url!==img){imgEl.dataset.url=img;imgEl.src=img;}imgEl.onerror=()=>{if(imgEl.src.indexOf(fb.img)===-1)imgEl.src=fb.img;};}
+    card.style.display=active?'grid':'none';
+    if(typeof PRODUCTS!=='undefined'&&PRODUCTS[id]){PRODUCTS[id].name=name;PRODUCTS[id].description=desc;PRODUCTS[id].price=price;PRODUCTS[id].active=active;PRODUCTS[id].imageUrl=(row&&row.image_url||'').trim();PRODUCTS[id].imagePath=(row&&row.image_path||'').trim();}
+  }
+  function renderFallback(){Object.keys(FALLBACK).forEach(id=>renderOne(id,null));}
+  async function syncCatalog(){
+    try{
+      const r=await fetch(`${SUPABASE_URL}/rest/v1/products?select=id,name,description,price,active,image_url,image_path&order=sort_order.asc`,{headers:{apikey:SUPABASE_KEY,Accept:'application/json'},cache:'no-store'});
+      if(!r.ok)throw new Error('Supabase '+r.status);
+      const rows=await r.json(),by={};for(const row of rows){const id=MAP[row.id];if(id)by[id]=row;}
+      Object.keys(FALLBACK).forEach(id=>renderOne(id,by[id]||null));
+    }catch(e){console.warn('Cake Lab: catalogue dynamique indisponible, affichage de secours conservé.',e);renderFallback();}
+  }
+  renderFallback();syncCatalog();
+  window.addEventListener('focus',syncCatalog);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncCatalog();});
+  setInterval(syncCatalog,30000);
 })();
 </script>
 
