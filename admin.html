@@ -71,7 +71,7 @@ button{cursor:pointer}
       </div>
     </div>
 
-    <div class="notice" id="publicNotice"><div>✓</div><div><b>Commandes connectées.</b> Les commandes confirmées sur le site sont enregistrées dans Supabase et apparaissent dans l’onglet Commandes. Le catalogue public reste inchangé.</div></div>
+    <div class="notice" id="publicNotice"><div>✓</div><div><b>Commandes connectées.</b> Les commandes confirmées sur le site sont enregistrées dans Supabase et apparaissent dans l’onglet Commandes. Les photos, prix et le Cake du mois enregistrés ici sont maintenant lus automatiquement par le site public.</div></div>
 
     <section class="stats" id="stats">
       <div class="stat"><div class="value" id="statTotal">0</div><div class="label">Produits</div><div class="mini">Toutes catégories</div></div>
@@ -107,7 +107,7 @@ button{cursor:pointer}
         </div>
         <div class="chips" id="filterChips">
           <button class="chip active" data-filter="all">Tous</button>
-          <button class="chip" data-filter="cake">Cakes</button>
+          <button class="chip" data-filter="cake">Cakes</button><button class="chip" data-filter="mini">Mini-cakes</button>
           <button class="chip" data-filter="box">Box</button>
           <button class="chip" data-filter="snack">Snacks & biscuits</button>
           <button class="chip" data-filter="hidden">Masqués</button>
@@ -137,7 +137,7 @@ button{cursor:pointer}
   <div class="modal">
     <div class="modal-head"><h3 id="modalTitle">Ajouter un produit</h3><button class="close" id="closeModal">×</button></div>
     <div class="form">
-      <div class="field"><label>Catégorie</label><select id="fCategory"><option value="cake">Cake</option><option value="box">Box</option><option value="snack">Snack / biscuit</option></select></div>
+      <div class="field"><label>Catégorie</label><select id="fCategory"><option value="cake">Cake</option><option value="mini">Mini-cake</option><option value="box">Box</option><option value="snack">Snack / biscuit</option></select></div>
       <div class="field"><label>Prix (FCFA)</label><input id="fPrice" type="number" min="0" step="500" placeholder="10000"></div>
       <div class="field full"><label>Nom du produit</label><input id="fName" maxlength="80" placeholder="Ex. Cake Chocolat"></div>
       <div class="field full"><label>Description</label><textarea id="fDescription" maxlength="260" placeholder="Description courte affichée sur le site"></textarea></div>
@@ -260,22 +260,28 @@ function startOrderWatcher(){
 }
 
 const seed=[
-{id:'chocolat',category:'cake',name:'Cake Chocolat Duo',description:'Chocolat au lait et chocolat blanc, ultra moelleux.',price:10000,image:'cl-chocolat.webp',active:true,isNew:false,isMonth:false,order:1},
+{id:'chocolat',category:'cake',name:'Cake Chocolat',description:'Chocolat intense et ultra moelleux.',price:10000,image:'cl-chocolat.webp',active:true,isNew:false,isMonth:false,order:1},
 {id:'citron',category:'cake',name:'Cake Citron',description:'Citron frais et moelleux pour une explosion de saveurs.',price:10000,image:'cl-citron.webp',active:true,isNew:false,isMonth:false,order:2},
 {id:'coco',category:'cake',name:'Cake Coco',description:'Un cake moelleux aux notes délicates de coco.',price:10000,image:'cl-coco.webp',active:true,isNew:false,isMonth:false,order:3},
 {id:'moka',category:'cake',name:'Cake Moka Café',description:'Délicieux mélange de café intense et de saveurs gourmandes.',price:10000,image:'cl-moka.webp',active:true,isNew:false,isMonth:false,order:4},
 {id:'mangue',category:'cake',name:'Cake Mangue Vanille',description:'Alliance parfaite entre la mangue fruitée et la vanille douce.',price:10000,image:'cl-mangue.webp',active:true,isNew:false,isMonth:false,order:5},
 {id:'vanille',category:'cake',name:'Cake Vanille',description:'Vanille intense et moelleux incomparable.',price:10000,image:'cl-vanille.webp',active:true,isNew:false,isMonth:false,order:6},
-{id:'bissap',category:'cake',name:'Cake Bissap Vanille',description:'L’alliance fleurie du bissap et de la vanille, un goût unique.',price:10500,image:'cl-bissap.webp',active:true,isNew:true,isMonth:true,order:7},
+{id:'bissap',category:'cake',name:'Cake Bissap Vanille',description:'L’alliance fleurie du bissap et de la vanille, un goût unique.',price:11000,image:'cl-bissap.webp',active:true,isNew:true,isMonth:true,order:7},
 {id:'teranga',category:'box',name:'Box Teranga',description:'4 mini cakes : Bissap Vanille, Guerté, Bouye Vanille et Gingembre Vanille.',price:12000,image:'cl-box-teranga.webp',active:true,isNew:false,isMonth:false,order:8},
-{id:'gourmande',category:'box',name:'Box Gourmande',description:'Kinder, Dulce de leche, Pistache et Crème brûlée.',price:16000,image:'cl-box-gourmande.webp',active:true,isNew:false,isMonth:false,order:9},
+{id:'gourmande',category:'box',name:'Box Gourmande',description:'4 mini cakes gourmands.',price:12000,image:'cl-box-gourmande.webp',active:true,isNew:false,isMonth:false,order:9},
 {id:'douceur',category:'box',name:'Box Douceur',description:'4 mini cakes : Chocolat, Mocha Café, Vanille et Coco.',price:12000,image:'cl-box-douceur.webp',active:true,isNew:false,isMonth:false,order:10},
-{id:'exotique',category:'box',name:'Box Exotique',description:'4 mini cakes : Citron, Mangue Vanille, Coco et Vanille.',price:12000,image:'cl-box-exotique.webp',active:true,isNew:false,isMonth:false,order:11}
+{id:'exotique',category:'box',name:'Box Exotique',description:'4 mini cakes : Citron, Mangue Vanille, Coco et Vanille.',price:12000,image:'cl-box-exotique.webp',active:true,isNew:false,isMonth:false,order:11},
+{id:'mini_choco',category:'mini',name:'Mini-cake Chocolat Duo',description:'Un cœur crémeux au chocolat au lait et au chocolat blanc.',price:3000,image:'cl-chocolat.webp',active:true,isNew:false,isMonth:false,order:20},
+{id:'mini_mango',category:'mini',name:'Mini-cake Mangue Vanille',description:'Un cœur onctueux à la mangue, relevé d’une touche de vanille.',price:3000,image:'cl-mangue.webp',active:true,isNew:false,isMonth:false,order:21},
+{id:'mini_vanilla',category:'mini',name:'Mini-cake Vanille Intense',description:'Un cœur crémeux à la vanille bourbon.',price:3000,image:'cl-vanille.webp',active:true,isNew:false,isMonth:false,order:22},
+{id:'mini_coco',category:'mini',name:'Mini-cake Coco',description:'Un cœur fondant à la noix de coco.',price:3000,image:'cl-coco.webp',active:true,isNew:false,isMonth:false,order:23},
+{id:'mini_lemon',category:'mini',name:'Mini-cake Citron',description:'Un cœur crémeux au citron, frais et acidulé.',price:3000,image:'cl-citron.webp',active:true,isNew:false,isMonth:false,order:24},
+{id:'mini_mocha',category:'mini',name:'Mini-cake Mocha Café',description:'Un cœur onctueux au café, relevé d’une touche de chocolat.',price:3000,image:'cl-moka.webp',active:true,isNew:false,isMonth:false,order:25}
 ];
 
 function clone(x){return JSON.parse(JSON.stringify(x))}
 function fmtPrice(n){return new Intl.NumberFormat('fr-FR').format(Number(n||0))+' F'}
-function catLabel(c){return c==='cake'?'Cake':c==='box'?'Box':'Snack / biscuit'}
+function catLabel(c){return c==='cake'?'Cake':c==='mini'?'Mini-cake':c==='box'?'Box':'Snack / biscuit'}
 function esc(s=''){return String(s).replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]))}
 function newId(){return 'p_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7)}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),2600)}
@@ -328,7 +334,17 @@ async function loadRemote(){
    const ins=await sb.from('products').insert(rows);
    if(ins.error)throw ins.error;
    products=clone(seed);
- }else products=data.map(appRow);
+ }else{
+   products=data.map(appRow);
+   const missing=seed.filter(s=>s.category==='mini'&&!products.some(p=>p.id===s.id));
+   if(missing.length){
+     const ins=await sb.from('products').insert(missing.map(dbRow));
+     if(ins.error)throw ins.error;
+     const refetch=await sb.from('products').select('*').order('sort_order',{ascending:true});
+     if(refetch.error)throw refetch.error;
+     products=(refetch.data||[]).map(appRow);
+   }
+ }
  await loadOrders();
  renderAll();
 }
