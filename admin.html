@@ -71,7 +71,7 @@ button{cursor:pointer}
       </div>
     </div>
 
-    <div class="notice" id="publicNotice"><div>✓</div><div><b>Commandes connectées.</b> Les commandes confirmées sur le site sont enregistrées dans Supabase et apparaissent dans l’onglet Commandes. Les photos, prix et le Cake du mois enregistrés ici sont maintenant lus automatiquement par le site public.</div></div>
+    <div class="notice" id="publicNotice"><div>✓</div><div><b>Commandes connectées.</b> Les commandes confirmées sur le site sont enregistrées dans Supabase et apparaissent dans l’onglet Commandes. Le catalogue public reste inchangé.</div></div>
 
     <section class="stats" id="stats">
       <div class="stat"><div class="value" id="statTotal">0</div><div class="label">Produits</div><div class="mini">Toutes catégories</div></div>
@@ -271,12 +271,12 @@ const seed=[
 {id:'gourmande',category:'box',name:'Box Gourmande',description:'4 mini cakes gourmands.',price:12000,image:'cl-box-gourmande.webp',active:true,isNew:false,isMonth:false,order:9},
 {id:'douceur',category:'box',name:'Box Douceur',description:'4 mini cakes : Chocolat, Mocha Café, Vanille et Coco.',price:12000,image:'cl-box-douceur.webp',active:true,isNew:false,isMonth:false,order:10},
 {id:'exotique',category:'box',name:'Box Exotique',description:'4 mini cakes : Citron, Mangue Vanille, Coco et Vanille.',price:12000,image:'cl-box-exotique.webp',active:true,isNew:false,isMonth:false,order:11},
-{id:'mini_choco',category:'mini',name:'Mini-cake Chocolat Duo',description:'Un cœur crémeux au chocolat au lait et au chocolat blanc.',price:3000,image:'cl-chocolat.webp',active:true,isNew:false,isMonth:false,order:20},
-{id:'mini_mango',category:'mini',name:'Mini-cake Mangue Vanille',description:'Un cœur onctueux à la mangue, relevé d’une touche de vanille.',price:3000,image:'cl-mangue.webp',active:true,isNew:false,isMonth:false,order:21},
-{id:'mini_vanilla',category:'mini',name:'Mini-cake Vanille Intense',description:'Un cœur crémeux à la vanille bourbon.',price:3000,image:'cl-vanille.webp',active:true,isNew:false,isMonth:false,order:22},
-{id:'mini_coco',category:'mini',name:'Mini-cake Coco',description:'Un cœur fondant à la noix de coco.',price:3000,image:'cl-coco.webp',active:true,isNew:false,isMonth:false,order:23},
-{id:'mini_lemon',category:'mini',name:'Mini-cake Citron',description:'Un cœur crémeux au citron, frais et acidulé.',price:3000,image:'cl-citron.webp',active:true,isNew:false,isMonth:false,order:24},
-{id:'mini_mocha',category:'mini',name:'Mini-cake Mocha Café',description:'Un cœur onctueux au café, relevé d’une touche de chocolat.',price:3000,image:'cl-moka.webp',active:true,isNew:false,isMonth:false,order:25}
+{id:'mini_choco',category:'mini',name:'Mini-cake Chocolat Duo',description:'Un cœur crémeux au chocolat au lait et au chocolat blanc.',price:3000,image:'',active:true,isNew:false,isMonth:false,order:20},
+{id:'mini_mango',category:'mini',name:'Mini-cake Mangue Vanille',description:'Un cœur onctueux à la mangue.',price:3000,image:'',active:true,isNew:false,isMonth:false,order:21},
+{id:'mini_vanilla',category:'mini',name:'Mini-cake Vanille Intense',description:'Un cœur crémeux à la vanille bourbon.',price:3000,image:'',active:true,isNew:false,isMonth:false,order:22},
+{id:'mini_coco',category:'mini',name:'Mini-cake Coco',description:'Un cœur fondant à la noix de coco.',price:3000,image:'',active:true,isNew:false,isMonth:false,order:23},
+{id:'mini_lemon',category:'mini',name:'Mini-cake Citron',description:'Un cœur crémeux au citron.',price:3000,image:'',active:true,isNew:false,isMonth:false,order:24},
+{id:'mini_mocha',category:'mini',name:'Mini-cake Mocha Café',description:'Un cœur onctueux au café.',price:3000,image:'',active:true,isNew:false,isMonth:false,order:25}
 ];
 
 function clone(x){return JSON.parse(JSON.stringify(x))}
@@ -336,13 +336,13 @@ async function loadRemote(){
    products=clone(seed);
  }else{
    products=data.map(appRow);
-   const missing=seed.filter(s=>s.category==='mini'&&!products.some(p=>p.id===s.id));
+   const missing=seed.filter(x=>x.category==='mini'&&!products.some(p=>p.id===x.id));
    if(missing.length){
      const ins=await sb.from('products').insert(missing.map(dbRow));
      if(ins.error)throw ins.error;
-     const refetch=await sb.from('products').select('*').order('sort_order',{ascending:true});
-     if(refetch.error)throw refetch.error;
-     products=(refetch.data||[]).map(appRow);
+     const ref=await sb.from('products').select('*').order('sort_order',{ascending:true});
+     if(ref.error)throw ref.error;
+     products=(ref.data||[]).map(appRow);
    }
  }
  await loadOrders();
