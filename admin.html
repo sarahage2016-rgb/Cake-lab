@@ -194,7 +194,7 @@ button{cursor:pointer}
       <div style="font-weight:900;margin-bottom:8px">Connexion administrateur</div>
       <div class="field"><label>Email</label><input id="loginEmail" type="email" placeholder="votre@email.com" autocomplete="username"></div>
       <div class="field"><label>Mot de passe</label><input id="loginPassword" type="password" placeholder="Votre mot de passe" autocomplete="current-password"></div>
-      <button class="btn primary" id="loginBtn" style="width:100%;margin-top:4px">Se connecter</button>
+      <button class="btn primary" id="loginBtn" style="width:100%;margin-top:4px">Se connecter</button><div id="loginError" style="display:none;margin-top:9px;padding:9px 10px;border-radius:10px;background:#fff0e8;color:#7a2f18;font-size:12px;font-weight:800;line-height:1.35"></div>
       <button class="btn" id="changeConfigBtn" style="width:100%;margin-top:8px">Changer la configuration Supabase</button>
       <div class="login-note">Aucun bouton d’inscription n’est proposé ici. Le compte administrateur est créé directement dans Supabase.</div>
     </div>
@@ -273,7 +273,7 @@ function startOrderWatcher(){
   orderPollTimer=setInterval(async()=>{
     if(!sb||!currentUser)return;
     try{await loadOrders();}catch(e){console.warn('Actualisation commandes',e);}
-    ticks++;if(ticks%4===0){try{await loadAnalytics();}catch(e){console.warn('Actualisation statistiques',e);}}
+    ticks++;if(ticks%4===0){await loadAnalyticsSafe();}
   },15000);
 }
 
@@ -375,6 +375,22 @@ async function loadAnalytics(){
   }
   siteEvents=data||[];renderAnalytics();
 }
+async function loadAnalyticsSafe(){
+  try{
+    await loadAnalytics();
+  }catch(e){
+    console.warn('Statistiques indisponibles sans bloquer l’administration',e);
+    siteEvents=[];
+    try{renderAnalytics()}catch(_){}
+    const ids=['aVisitsToday','aUniqueToday','aCartsToday','aAbandonedToday','aOrdersToday'];
+    ids.forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='—'});
+    if(typeof aVisits7!=='undefined')aVisits7.textContent='Statistiques temporairement indisponibles';
+    if(typeof aUnique7!=='undefined')aUnique7.textContent='Connexion admin conservée';
+    if(typeof aCarts7!=='undefined')aCarts7.textContent='—';
+    if(typeof aAbandoned7!=='undefined')aAbandoned7.textContent='—';
+    if(typeof aConversion7!=='undefined')aConversion7.textContent='—';
+  }
+}
 function renderAll(){renderStats();renderProducts();renderRecent();renderMonth();renderNew();renderSnacks();renderOrders();renderAnalytics()}
 
 
@@ -398,7 +414,7 @@ async function loadRemote(){
    }
  }
  await loadOrders();
- await loadAnalytics();
+ await loadAnalyticsSafe();
  renderAll();
 }
 async function requireAdmin(){
@@ -408,7 +424,7 @@ async function requireAdmin(){
 }
 
 function switchView(v){activeView=v;if(v==='orders')document.title='Cake Lab — Administration';document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+v));document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active',x.dataset.view===v));const titles={dashboard:['Tableau de bord','Gérez le catalogue Cake Lab sans modifier la mise en page du site public.'],orders:['Commandes','Consultez les nouvelles commandes reçues depuis le site.'],products:['Produits','Ajoutez, modifiez, masquez ou supprimez des produits.'],month:['Cake du mois','Changez facilement le produit mis en avant chaque mois.'],new:['Nouveautés','Choisissez les produits à mettre en avant comme nouveautés.'],snacks:['Snacks & biscuits','Préparez vos futures boîtes de biscuits et snacks.']};document.querySelector('.title h1').textContent=titles[v][0];subtitle.textContent=titles[v][1];window.scrollTo({top:0,behavior:'smooth'})}
-document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>switchView(b.dataset.view));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>switchView(b.dataset.go));refreshOrdersBtn.onclick=async()=>{try{await loadOrders();toast('Commandes actualisées.')}catch(e){toast(e.message||'Actualisation impossible.')}};refreshAnalyticsBtn.onclick=async()=>{try{await loadAnalytics();toast('Statistiques actualisées.')}catch(e){toast(e.message||'Statistiques indisponibles.')}};document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{filter=b.dataset.filter;document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('active',x===b));renderProducts()});searchInput.oninput=e=>{search=e.target.value;renderProducts()};sortSelect.onchange=e=>{sort=e.target.value;renderProducts()};
+document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>switchView(b.dataset.view));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>switchView(b.dataset.go));refreshOrdersBtn.onclick=async()=>{try{await loadOrders();toast('Commandes actualisées.')}catch(e){toast(e.message||'Actualisation impossible.')}};refreshAnalyticsBtn.onclick=async()=>{await loadAnalyticsSafe();toast('Statistiques actualisées.');};document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{filter=b.dataset.filter;document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('active',x===b));renderProducts()});searchInput.oninput=e=>{search=e.target.value;renderProducts()};sortSelect.onchange=e=>{sort=e.target.value;renderProducts()};
 
 function openAdd(category='cake',markNew=false){editingId=null;pendingFile=null;pendingPreview='';modalTitle.textContent='Ajouter un produit';dangerZone.style.display='none';fillForm({category,price:10000,name:'',description:'',order:products.length+1,image:'',imageUrl:'',active:true,isNew:markNew,isMonth:false});showProductModal()}
 function openEdit(pid){const p=products.find(x=>x.id===pid);if(!p)return;editingId=pid;pendingFile=null;pendingPreview='';modalTitle.textContent='Modifier le produit';dangerZone.style.display='block';fillForm(p);showProductModal()}
@@ -460,7 +476,37 @@ async function boot(){loadingPanel.style.display='block';if(!await connectClient
 
 saveConfigBtn.onclick=async()=>{const u=cfgUrl.value.trim(),k=cfgKey.value.trim();if(!u||!k){toast('Collez l’URL et la clé publique Supabase.');return}setCfg(u,k);location.reload()};
 changeConfigBtn.onclick=()=>showSetup();
-loginBtn.onclick=async()=>{const email=loginEmail.value.trim(),password=loginPassword.value;if(!email||!password){toast('Entrez votre email et votre mot de passe.');return}setBusy(loginBtn,true);try{const {data,error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;await openApp(data.session);toast('Connexion réussie.')}catch(e){console.error(e);toast(e.message||'Connexion impossible.')}finally{setBusy(loginBtn,false)}};
+loginBtn.onclick=async()=>{
+  const email=loginEmail.value.trim(),password=loginPassword.value;
+  loginError.style.display='none';loginError.textContent='';
+  if(!email||!password){
+    loginError.textContent='Entrez votre email et votre mot de passe.';
+    loginError.style.display='block';
+    return;
+  }
+  if(!sb){
+    loginError.textContent='La connexion Supabase n’est pas initialisée. Cliquez sur « Changer la configuration Supabase » puis enregistrez de nouveau la connexion.';
+    loginError.style.display='block';
+    return;
+  }
+  setBusy(loginBtn,true);
+  try{
+    const {data,error}=await sb.auth.signInWithPassword({email,password});
+    if(error)throw error;
+    if(!data||!data.session)throw new Error('Supabase n’a pas renvoyé de session de connexion.');
+    await openApp(data.session);
+    loginError.style.display='none';
+    toast('Connexion réussie.');
+  }catch(e){
+    console.error(e);
+    const msg=e?.message||'Connexion impossible.';
+    loginError.textContent=msg;
+    loginError.style.display='block';
+    toast(msg);
+  }finally{
+    setBusy(loginBtn,false);
+  }
+};
 loginPassword.onkeydown=e=>{if(e.key==='Enter')loginBtn.click()};
 lockBtn.onclick=async()=>{if(sb)await sb.auth.signOut();showLogin()};
 
