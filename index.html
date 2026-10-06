@@ -291,20 +291,54 @@ html,body{
 </style>
 
 
-<style id="cake-lab-home-cart-badge-definitive">
-/* Accueil : la pastille dynamique recouvre exactement le chiffre intégré au visuel. */
-#home .badge{
-  right:12.1%!important;
-  top:2.72%!important;
-  width:28px!important;
-  height:28px!important;
-  font-size:12px!important;
-  display:flex!important;
-  box-shadow:none!important;
-  border:none!important;
+
+
+
+<style id="cake-lab-home-single-cart-fix">
+/* Accueil : on masque complètement la zone panier intégrée au visuel,
+   puis on affiche un seul ensemble propre (sac + compteur). */
+#home::after{
+  content:"";
+  position:absolute;
+  right:0.4%;
+  top:0.2%;
+  width:16.6%;
+  height:8.4%;
+  background:#fffaf6;
+  border-radius:0 0 0 26px;
+  z-index:24;
+  pointer-events:none;
 }
-#home .badge.zero{
+#home::before{
+  content:"";
+  position:absolute;
+  right:9.1%;
+  top:0.95%;
+  width:3.6%;
+  aspect-ratio:1 / 1;
+  z-index:28;
+  pointer-events:none;
+  background-repeat:no-repeat;
+  background-size:contain;
+  background-position:center;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M21 23V18c0-6.1 4.9-11 11-11s11 4.9 11 11v5' fill='none' stroke='%23180f0d' stroke-width='4.2' stroke-linecap='round'/%3E%3Cpath d='M17 22h30c2.6 0 4.7 2.2 4.5 4.8l-2 24.4A5 5 0 0 1 44 56H20a5 5 0 0 1-5-4.6l-2-24.4c-.2-2.6 1.9-4.8 4.5-4.8Z' fill='none' stroke='%23180f0d' stroke-width='4.2' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+#homeBadge{
+  right:3.45%!important;
+  top:1.05%!important;
+  width:46px!important;
+  height:46px!important;
+  font:700 26px/1 Arial,Helvetica,sans-serif!important;
+  z-index:29!important;
+  border:none!important;
+  box-shadow:none!important;
   display:flex!important;
+}
+#homeBadge.zero{display:flex!important}
+@media (max-width: 768px){
+  #home::after{right:0.3%;top:0.15%;width:18.6%;height:8.7%;border-radius:0 0 0 20px}
+  #home::before{right:10.0%;top:1.15%;width:4.4%}
+  #homeBadge{right:3.9%!important;top:1.25%!important;width:38px!important;height:38px!important;font-size:19px!important}
 }
 </style>
 
