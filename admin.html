@@ -37,6 +37,12 @@ button{cursor:pointer}
 .modal-back{position:fixed;inset:0;background:rgba(39,20,13,.52);display:none;align-items:center;justify-content:center;padding:16px;z-index:100}.modal-back.show{display:flex}.modal{width:min(780px,100%);max-height:94vh;overflow:auto;background:#fffaf6;border-radius:22px;padding:20px;box-shadow:0 30px 90px rgba(0,0,0,.25)}.modal-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:15px}.modal h3{margin:0;font:800 25px Georgia,serif}.close{border:0;background:#f1e6da;border-radius:10px;width:36px;height:36px;font-size:18px}.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:grid;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:12px;font-weight:900;color:#624d42}.field input,.field select,.field textarea{border:1px solid var(--line);border-radius:11px;padding:11px 12px;background:#fff;outline:0}.field textarea{min-height:94px;resize:vertical}.checks{display:flex;flex-wrap:wrap;gap:13px;padding:5px 0}.checks label{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700}.preview{height:200px;border:1px dashed var(--line);border-radius:14px;background:#f9f1e7;display:grid;place-items:center;overflow:hidden}.preview img{width:100%;height:100%;object-fit:cover}.preview span{color:var(--muted);font-size:13px}.modal-foot{display:flex;justify-content:flex-end;gap:9px;margin-top:16px}.danger-zone{margin-top:15px;border-top:1px solid var(--line);padding-top:14px}.danger-zone .btn{font-size:12px}
 .toast{position:fixed;right:18px;bottom:18px;background:#2d201a;color:#fff;border-radius:12px;padding:11px 14px;font-size:13px;font-weight:800;display:none;z-index:200;box-shadow:0 12px 30px rgba(0,0,0,.2)}.toast.show{display:block}
 .login-cover{position:fixed;inset:0;background:linear-gradient(135deg,#3e170d,#6e2c18);display:none;align-items:center;justify-content:center;z-index:300;padding:18px}.login-cover.show{display:flex}.login-box{width:min(410px,100%);background:#fffaf5;border-radius:22px;padding:25px;box-shadow:0 30px 90px rgba(0,0,0,.3)}.login-brand{font:900 30px Georgia,serif;color:var(--choco);margin-bottom:2px}.login-sub{font-size:12px;letter-spacing:2px;color:#8c7265;margin-bottom:20px}.login-box .field{margin-bottom:11px}.login-note{font-size:11px;color:#8d7569;line-height:1.4;margin-top:10px}
+
+.analytics-panel{background:rgba(255,255,255,.88);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:17px;margin-bottom:18px}
+.analytics-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:13px}.analytics-head h2{font:800 23px Georgia,serif;margin:0}.analytics-head p{margin:3px 0 0;font-size:13px;color:var(--muted)}
+.analytics-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.analytics-card{background:#fffaf5;border:1px solid var(--line);border-radius:15px;padding:14px}.analytics-value{font-size:27px;font-weight:900;color:var(--choco);line-height:1}.analytics-label{font-size:12px;font-weight:800;color:var(--ink);margin-top:7px}.analytics-mini{font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.35}.analytics-card.warn .analytics-value{color:#9b4a21}.analytics-card.good .analytics-value{color:var(--green)}
+@media(max-width:1100px){.analytics-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){.analytics-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:1100px){.stats{grid-template-columns:repeat(3,1fr)}.products,.new-grid{grid-template-columns:repeat(2,1fr)}.month-layout{grid-template-columns:1fr}}
 @media(max-width:850px){.app{grid-template-columns:1fr}.sidebar{height:auto;position:sticky;top:0;padding:12px 14px;display:block}.brand{font-size:23px}.brand-sub{margin-bottom:10px}.nav{display:flex;overflow:auto;gap:6px}.navbtn{white-space:nowrap;font-size:12px;padding:9px 11px}.side-bottom{display:none}.main{padding:16px 14px 40px}.topbar{align-items:flex-start;flex-direction:column}.title h1{font-size:26px}.stats{grid-template-columns:repeat(2,1fr)}.panel-head{align-items:flex-start;flex-direction:column}.toolbar{width:100%}.search{min-width:0;flex:1}.products,.new-grid{grid-template-columns:1fr 1fr}.thumb{height:155px}}
 @media(max-width:600px){.products,.new-grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.form{grid-template-columns:1fr}.field.full{grid-column:auto}.top-actions{width:100%}.top-actions .btn{flex:1}.month-hero{height:220px}.card-actions{grid-template-columns:1fr 1fr}.notice{font-size:12px}}
@@ -82,6 +88,16 @@ button{cursor:pointer}
     </section>
 
     <section class="view active" id="view-dashboard">
+      <div class="analytics-panel" id="analyticsPanel">
+        <div class="analytics-head"><div><h2>Visites & paniers</h2><p>Statistiques du site public. Un panier est considéré non finalisé après 30 minutes sans commande confirmée.</p></div><button class="btn soft" id="refreshAnalyticsBtn">Actualiser</button></div>
+        <div class="analytics-grid">
+          <div class="analytics-card"><div class="analytics-value" id="aVisitsToday">—</div><div class="analytics-label">Visites aujourd’hui</div><div class="analytics-mini" id="aVisits7">7 derniers jours : —</div></div>
+          <div class="analytics-card"><div class="analytics-value" id="aUniqueToday">—</div><div class="analytics-label">Visiteurs uniques</div><div class="analytics-mini" id="aUnique7">7 derniers jours : —</div></div>
+          <div class="analytics-card"><div class="analytics-value" id="aCartsToday">—</div><div class="analytics-label">Paniers commencés</div><div class="analytics-mini" id="aCarts7">7 derniers jours : —</div></div>
+          <div class="analytics-card warn"><div class="analytics-value" id="aAbandonedToday">—</div><div class="analytics-label">Paniers non finalisés</div><div class="analytics-mini" id="aAbandoned7">7 derniers jours : —</div></div>
+          <div class="analytics-card good"><div class="analytics-value" id="aOrdersToday">—</div><div class="analytics-label">Commandes finalisées</div><div class="analytics-mini" id="aConversion7">Taux de finalisation 7 j : —</div></div>
+        </div>
+      </div>
       <div class="panel">
         <div class="panel-head"><div><h2>Produits récents</h2><p>Accès rapide aux produits du catalogue.</p></div><button class="btn soft" data-go="products">Voir tout le catalogue</button></div>
         <div class="products" id="recentGrid"></div>
@@ -191,7 +207,7 @@ button{cursor:pointer}
 <script>
 const CONFIG_KEY='cakeLabSupabaseConfigV1';
 const BUCKET='product-images';
-let sb=null, currentUser=null, products=[], orders=[];
+let sb=null, currentUser=null, products=[], orders=[], siteEvents=[];
 let activeView='dashboard', filter='all', search='', sort='order', editingId=null;
 let pendingFile=null, pendingPreview='';
 let ordersInitialized=false, knownOrderIds=new Set(), orderPollTimer=null;
@@ -253,9 +269,11 @@ function notifyNewOrder(o){
 
 function startOrderWatcher(){
   if(orderPollTimer)clearInterval(orderPollTimer);
+  let ticks=0;
   orderPollTimer=setInterval(async()=>{
     if(!sb||!currentUser)return;
     try{await loadOrders();}catch(e){console.warn('Actualisation commandes',e);}
+    ticks++;if(ticks%4===0){try{await loadAnalytics();}catch(e){console.warn('Actualisation statistiques',e);}}
   },15000);
 }
 
@@ -324,7 +342,41 @@ async function loadOrders(){
 }
 async function updateOrderStatus(id,status){const {error}=await sb.from('orders').update({status,updated_at:new Date().toISOString()}).eq('id',id);if(error){toast(error.message);return}await loadOrders();toast('Statut de la commande mis à jour.')}
 async function deleteOrder(id){if(!confirm('Supprimer définitivement cette commande ?'))return;const {error}=await sb.from('orders').delete().eq('id',id);if(error){toast(error.message);return}await loadOrders();toast('Commande supprimée.')}
-function renderAll(){renderStats();renderProducts();renderRecent();renderMonth();renderNew();renderSnacks();renderOrders()}
+
+function localDayStart(daysAgo=0){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-daysAgo);return d}
+function uniqueCount(arr,key){return new Set(arr.map(x=>x[key]).filter(Boolean)).size}
+function analyticsFor(since){
+  const ev=siteEvents.filter(e=>new Date(e.created_at)>=since);
+  const visits=ev.filter(e=>e.event_type==='visit');
+  const carts=ev.filter(e=>e.event_type==='cart_started');
+  const completed=ev.filter(e=>e.event_type==='order_completed');
+  const completedSessions=new Set(siteEvents.filter(e=>e.event_type==='order_completed').map(e=>e.session_id));
+  const cutoff=Date.now()-30*60*1000;
+  const abandonedSessions=new Set(carts.filter(e=>new Date(e.created_at).getTime()<=cutoff&&!completedSessions.has(e.session_id)).map(e=>e.session_id));
+  return {visits:visits.length,unique:uniqueCount(visits,'visitor_id'),carts:uniqueCount(carts,'session_id'),abandoned:abandonedSessions.size,orders:uniqueCount(completed,'session_id')}
+}
+function renderAnalytics(){
+  const t=analyticsFor(localDayStart(0)),w=analyticsFor(localDayStart(6));
+  aVisitsToday.textContent=t.visits;aUniqueToday.textContent=t.unique;aCartsToday.textContent=t.carts;aAbandonedToday.textContent=t.abandoned;aOrdersToday.textContent=t.orders;
+  aVisits7.textContent=`7 derniers jours : ${w.visits}`;aUnique7.textContent=`7 derniers jours : ${w.unique}`;aCarts7.textContent=`7 derniers jours : ${w.carts}`;aAbandoned7.textContent=`7 derniers jours : ${w.abandoned}`;
+  const rate=w.carts?Math.round((w.orders/w.carts)*100):0;aConversion7.textContent=`Taux de finalisation 7 j : ${rate} %`;
+}
+async function loadAnalytics(){
+  const since=new Date(Date.now()-30*24*60*60*1000).toISOString();
+  const {data,error}=await sb.from('site_events').select('event_type,session_id,visitor_id,created_at').gte('created_at',since).order('created_at',{ascending:false});
+  if(error){
+    const msg=String(error.message||'');
+    if(error.code==='42P01'||error.code==='PGRST205'||msg.toLowerCase().includes('site_events')){
+      siteEvents=[];renderAnalytics();
+      ['aVisitsToday','aUniqueToday','aCartsToday','aAbandonedToday','aOrdersToday'].forEach(id=>document.getElementById(id).textContent='—');
+      aVisits7.textContent='Activez le suivi dans Supabase';aUnique7.textContent='Voir le fichier SQL fourni';aCarts7.textContent='En attente';aAbandoned7.textContent='En attente';aConversion7.textContent='En attente';return
+    }
+    throw error
+  }
+  siteEvents=data||[];renderAnalytics();
+}
+function renderAll(){renderStats();renderProducts();renderRecent();renderMonth();renderNew();renderSnacks();renderOrders();renderAnalytics()}
+
 
 async function loadRemote(){
  const {data,error}=await sb.from('products').select('*').order('sort_order',{ascending:true});
@@ -346,6 +398,7 @@ async function loadRemote(){
    }
  }
  await loadOrders();
+ await loadAnalytics();
  renderAll();
 }
 async function requireAdmin(){
@@ -355,7 +408,7 @@ async function requireAdmin(){
 }
 
 function switchView(v){activeView=v;if(v==='orders')document.title='Cake Lab — Administration';document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+v));document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active',x.dataset.view===v));const titles={dashboard:['Tableau de bord','Gérez le catalogue Cake Lab sans modifier la mise en page du site public.'],orders:['Commandes','Consultez les nouvelles commandes reçues depuis le site.'],products:['Produits','Ajoutez, modifiez, masquez ou supprimez des produits.'],month:['Cake du mois','Changez facilement le produit mis en avant chaque mois.'],new:['Nouveautés','Choisissez les produits à mettre en avant comme nouveautés.'],snacks:['Snacks & biscuits','Préparez vos futures boîtes de biscuits et snacks.']};document.querySelector('.title h1').textContent=titles[v][0];subtitle.textContent=titles[v][1];window.scrollTo({top:0,behavior:'smooth'})}
-document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>switchView(b.dataset.view));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>switchView(b.dataset.go));refreshOrdersBtn.onclick=async()=>{try{await loadOrders();toast('Commandes actualisées.')}catch(e){toast(e.message||'Actualisation impossible.')}};document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{filter=b.dataset.filter;document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('active',x===b));renderProducts()});searchInput.oninput=e=>{search=e.target.value;renderProducts()};sortSelect.onchange=e=>{sort=e.target.value;renderProducts()};
+document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>switchView(b.dataset.view));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>switchView(b.dataset.go));refreshOrdersBtn.onclick=async()=>{try{await loadOrders();toast('Commandes actualisées.')}catch(e){toast(e.message||'Actualisation impossible.')}};refreshAnalyticsBtn.onclick=async()=>{try{await loadAnalytics();toast('Statistiques actualisées.')}catch(e){toast(e.message||'Statistiques indisponibles.')}};document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{filter=b.dataset.filter;document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('active',x===b));renderProducts()});searchInput.oninput=e=>{search=e.target.value;renderProducts()};sortSelect.onchange=e=>{sort=e.target.value;renderProducts()};
 
 function openAdd(category='cake',markNew=false){editingId=null;pendingFile=null;pendingPreview='';modalTitle.textContent='Ajouter un produit';dangerZone.style.display='none';fillForm({category,price:10000,name:'',description:'',order:products.length+1,image:'',imageUrl:'',active:true,isNew:markNew,isMonth:false});showProductModal()}
 function openEdit(pid){const p=products.find(x=>x.id===pid);if(!p)return;editingId=pid;pendingFile=null;pendingPreview='';modalTitle.textContent='Modifier le produit';dangerZone.style.display='block';fillForm(p);showProductModal()}
