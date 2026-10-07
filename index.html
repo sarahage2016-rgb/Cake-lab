@@ -387,7 +387,7 @@ const P={
 };
 const MINI_IDS=['mini_choco','mini_mango','mini_vanilla','mini_coco','mini_lemon','mini_mocha'];const FEES={'Plateau':1000,'Point E':2000,'Fann':2500,'Mermoz':2500,'Ouakam':3000,'Ngor':3000,'Almadies':3000,'Maristes':3000,'Yoff / Virage':3500,'Parcelles Assainies':3500};const SUPA='https://mjcoidbfmzlqxvrnyayd.supabase.co',KEY='sb_publishable_DcjUuH5aWrkAcXTw-02xZg_wZfd9wy3',WA='221777535857';
 
-/* Cake Lab — statistiques anonymes du site. Aucune donnée personnelle n'est collectée ici. */
+/* Cake Lab — statistiques du site. Le numéro de téléphone n'est enregistré que si le client le saisit lui-même dans le formulaire de commande. */
 function clId(storage,key){
   try{
     let v=storage.getItem(key);
@@ -414,6 +414,38 @@ function trackCartStarted(){
 }
 function trackCheckoutStarted(){
   try{if(sessionStorage.getItem('cakeLabCheckoutTracked'))return;sessionStorage.setItem('cakeLabCheckoutTracked','1');trackSiteEvent('checkout_started',{items:count(),subtotal:subtotal()})}catch(e){}
+}
+
+function clCartSnapshot(){
+  try{
+    return cart.map(x=>({
+      id:x.id,
+      name:(P[x.id]&&P[x.id].n)||x.id,
+      qty:x.q,
+      unit_price:(P[x.id]&&P[x.id].p)||0
+    }));
+  }catch(e){return []}
+}
+let clPhoneTrackTimer=null;
+function trackCheckoutContact(){
+  try{
+    const el=$('phone');
+    if(!el||!cart.length)return;
+    const raw=String(el.value||'').trim();
+    const digits=raw.replace(/\D/g,'');
+    if(digits.length<8)return;
+    const snapshot=clCartSnapshot();
+    const signature=digits+'|'+JSON.stringify(snapshot.map(x=>[x.id,x.qty]));
+    if(sessionStorage.getItem('cakeLabLastContactTracked')===signature)return;
+    sessionStorage.setItem('cakeLabLastContactTracked',signature);
+    trackSiteEvent('checkout_started',{
+      contact_captured:true,
+      phone:raw,
+      items:count(),
+      subtotal:subtotal(),
+      cart:snapshot
+    });
+  }catch(e){}
 }
 
 let cart=JSON.parse(localStorage.getItem('cakeLabCartMockupFinal')||'[]').filter(x=>P[x.id]),delivery='home',draft=null;const $=id=>document.getElementById(id),money=n=>new Intl.NumberFormat('fr-FR').format(+n||0)+' FCFA';
@@ -466,6 +498,16 @@ function setDelivery(v){
   toast(v==='pickup'?'Retrait sur place sélectionné.':'Livraison à domicile sélectionnée.');
 }
 function minDate(){const d=new Date();d.setDate(d.getDate()+1);$('date').min=d.toISOString().slice(0,10)}function fieldState(e){e.classList.toggle('filled',!!e.value)}document.querySelectorAll('.cfield').forEach(e=>{e.addEventListener('input',()=>fieldState(e));e.addEventListener('change',()=>{fieldState(e);renderCheckout()});e.addEventListener('blur',()=>fieldState(e))});
+const clPhoneField=$('phone');
+if(clPhoneField){
+  clPhoneField.addEventListener('input',()=>{
+    clearTimeout(clPhoneTrackTimer);
+    clPhoneTrackTimer=setTimeout(trackCheckoutContact,900);
+  });
+  clPhoneField.addEventListener('change',trackCheckoutContact);
+  clPhoneField.addEventListener('blur',trackCheckoutContact);
+}
+
 function renderCheckout(){const ol=$('orderLayer'),sl=$('summaryLayer');if(!cart.length){ol.innerHTML='<div class="notice">Votre panier est vide.</div>';sl.innerHTML='';return}ol.innerHTML=cart.map(x=>{const p=P[x.id];return `<div class="checkout-row"><img src="${p.i}"><div><b>${p.n}</b><small>${money(p.p)}</small></div><div class="qty"><button onclick="changeQty('${x.id}',-1,true)">−</button><b>${x.q}</b><button onclick="changeQty('${x.id}',1,true)">+</button></div><button class="trash" onclick="removeItem('${x.id}',true)">🗑</button></div>`}).join('');const fee=delivery==='home'?(FEES[$('zone').value]||0):0;const total=subtotal()+fee;sl.innerHTML=cart.map(x=>`<div class="sumrow"><span>${P[x.id].n} ×${x.q}</span><b>${money(P[x.id].p*x.q)}</b></div>`).join('')+(fee?`<div class="sumrow"><span>Livraison</span><b>${money(fee)}</b></div>`:'')+`<div class="sumtotal"><span>Total</span><span>${money(total)}</span></div>`}
 function splitName(n){const a=n.trim().split(/\s+/);return{first_name:a.shift()||'',last_name:a.join(' ')||'Client'}}function waveContact(){location.href=`https://wa.me/${WA}?text=${encodeURIComponent('Bonjour Cake Lab 🤎 Je souhaite recevoir les instructions pour payer mon acompte de 50 % par Wave.')}`}
 function prepareOrder(){if(!cart.length){toast('Votre panier est vide.');return}if(!validMinis())return;const name=$('fullName').value.trim(),phone=$('phone').value.trim(),date=$('date').value,slot=$('slot').value,notes=$('notes').value.trim();if(!name||!phone||!date||!slot){toast('Merci de remplir les informations obligatoires.');return}let address='',zone='',fee=0;if(delivery==='home'){address=$('address').value.trim();zone=$('zone').value;if(!address||!zone){toast('Merci de renseigner votre adresse et votre zone.');return}fee=FEES[zone]||0}else{address='Retrait sur place';zone='Retrait sur place'}const nm=splitName(name),items=cart.map(x=>({id:x.id,name:P[x.id].n,qty:x.q,unit_price:P[x.id].p,line_total:P[x.id].p*x.q})),sub=subtotal(),total=sub+fee;draft={...nm,phone,address,zone,delivery_date:date,time_slot:slot,items,subtotal:sub,delivery_fee:fee,topper_fee:0,topper_message:null,total,payment_method:'Paiement à la livraison',notes,delivery};const dep=Math.round(sub*.5);openModal(`<button class="x" onclick="closeModal()">×</button><h3>Vérifier ma commande</h3>${items.map(x=>`<div class="cartrow"><img src="${P[x.id].i}"><div class="cartname">${x.name} ×${x.qty}</div><b>${money(x.line_total)}</b></div>`).join('')}<div class="notice"><b>${name}</b><br>${phone}<br>${delivery==='home'?address+', '+zone:'Retrait sur place'}<br>${date} — ${slot}${notes?'<br>'+notes:''}</div><div class="tot"><span>Total</span><span>${money(total)}</span></div><div class="notice"><b>Acompte 50 % : ${money(dep)}</b><br>Après validation, WhatsApp s’ouvrira avec les instructions de paiement.</div><button id="okbtn" class="primary" onclick="confirmOrder()">Confirmer ma commande</button><button class="secondary" onclick="closeModal()">Retour</button>`)}

@@ -41,6 +41,17 @@ button{cursor:pointer}
 .analytics-panel{background:rgba(255,255,255,.88);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:17px;margin-bottom:18px}
 .analytics-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:13px}.analytics-head h2{font:800 23px Georgia,serif;margin:0}.analytics-head p{margin:3px 0 0;font-size:13px;color:var(--muted)}
 .analytics-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.analytics-card{background:#fffaf5;border:1px solid var(--line);border-radius:15px;padding:14px}.analytics-value{font-size:27px;font-weight:900;color:var(--choco);line-height:1}.analytics-label{font-size:12px;font-weight:800;color:var(--ink);margin-top:7px}.analytics-mini{font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.35}.analytics-card.warn .analytics-value{color:#9b4a21}.analytics-card.good .analytics-value{color:var(--green)}
+.abandoned-list{display:grid;gap:10px}
+.abandoned-card{background:#fffaf5;border:1px solid var(--line);border-radius:15px;padding:13px}
+.abandoned-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.abandoned-phone{font:800 17px Georgia,serif;color:var(--choco)}
+.abandoned-time{font-size:11px;color:var(--muted);margin-top:3px}
+.abandoned-amount{font-weight:900;color:var(--choco);white-space:nowrap}
+.abandoned-items{margin-top:9px;background:#fff;border-radius:11px;padding:9px 10px;font-size:12px;line-height:1.5}
+.abandoned-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+.abandoned-wa{display:inline-flex;align-items:center;text-decoration:none;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;color:var(--choco);font-weight:800;font-size:12px}
+.abandoned-empty{padding:22px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px;background:#fff}
+
 @media(max-width:1100px){.analytics-grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:700px){.analytics-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:1100px){.stats{grid-template-columns:repeat(3,1fr)}.products,.new-grid{grid-template-columns:repeat(2,1fr)}.month-layout{grid-template-columns:1fr}}
@@ -97,6 +108,10 @@ button{cursor:pointer}
           <div class="analytics-card warn"><div class="analytics-value" id="aAbandonedToday">—</div><div class="analytics-label">Paniers non finalisés</div><div class="analytics-mini" id="aAbandoned7">7 derniers jours : —</div></div>
           <div class="analytics-card good"><div class="analytics-value" id="aOrdersToday">—</div><div class="analytics-label">Commandes finalisées</div><div class="analytics-mini" id="aConversion7">Taux de finalisation 7 j : —</div></div>
         </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div><h2>Paniers non finalisés identifiés</h2><p>Le numéro apparaît seulement si le client l’a lui-même saisi dans le formulaire. Un panier s’affiche ici après 30 minutes sans commande confirmée.</p></div></div>
+        <div class="abandoned-list" id="abandonedContactList"></div>
       </div>
       <div class="panel">
         <div class="panel-head"><div><h2>Produits récents</h2><p>Accès rapide aux produits du catalogue.</p></div><button class="btn soft" data-go="products">Voir tout le catalogue</button></div>
@@ -355,15 +370,89 @@ function analyticsFor(since){
   const abandonedSessions=new Set(carts.filter(e=>new Date(e.created_at).getTime()<=cutoff&&!completedSessions.has(e.session_id)).map(e=>e.session_id));
   return {visits:visits.length,unique:uniqueCount(visits,'visitor_id'),carts:uniqueCount(carts,'session_id'),abandoned:abandonedSessions.size,orders:uniqueCount(completed,'session_id')}
 }
+
+function normalizedWhatsAppPhone(raw=''){
+  let d=String(raw).replace(/\D/g,'');
+  if(d.startsWith('00'))d=d.slice(2);
+  if(d.startsWith('221'))return d;
+  if(d.length===9&&d.startsWith('7'))return '221'+d;
+  if(d.startsWith('0')&&d.length===10)return '221'+d.slice(1);
+  return d;
+}
+function abandonedContacts(){
+  const completedSessions=new Set(siteEvents.filter(e=>e.event_type==='order_completed').map(e=>e.session_id));
+  const cutoff=Date.now()-30*60*1000;
+  const sessions=new Map();
+
+  for(const e of siteEvents){
+    if(!e.session_id||completedSessions.has(e.session_id))continue;
+    if(e.event_type!=='cart_started'&&e.event_type!=='checkout_started')continue;
+    const t=new Date(e.created_at).getTime();
+    const cur=sessions.get(e.session_id)||{lastActivity:0,contact:null};
+    if(t>cur.lastActivity)cur.lastActivity=t;
+
+    const m=e.metadata||{};
+    const phone=String(m.phone||'').trim();
+    if(e.event_type==='checkout_started'&&m.contact_captured&&phone){
+      if(!cur.contact||t>cur.contact.time){
+        cur.contact={time:t,created_at:e.created_at,phone,metadata:m};
+      }
+    }
+    sessions.set(e.session_id,cur);
+  }
+
+  const rows=[];
+  for(const [session_id,s] of sessions){
+    if(!s.contact||s.lastActivity>cutoff)continue;
+    rows.push({session_id,...s.contact,lastActivity:s.lastActivity});
+  }
+  return rows.sort((a,b)=>b.lastActivity-a.lastActivity);
+}
+function renderAbandonedContacts(){
+  const box=document.getElementById('abandonedContactList');
+  if(!box)return;
+  const rows=abandonedContacts();
+
+  if(!rows.length){
+    box.innerHTML='<div class="abandoned-empty">Aucun panier non finalisé avec numéro de téléphone pour le moment.</div>';
+    return;
+  }
+
+  box.innerHTML=rows.map(r=>{
+    const m=r.metadata||{};
+    const cart=Array.isArray(m.cart)?m.cart:[];
+    const details=cart.length
+      ? cart.map(x=>`${esc(x.name||x.id||'Article')} ×${Number(x.qty)||1}`).join('<br>')
+      : `${Number(m.items)||0} article(s)`;
+    const amount=Number(m.subtotal)||0;
+    const wa=normalizedWhatsAppPhone(r.phone);
+    const when=new Date(r.lastActivity).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'});
+    const waHref=wa?`https://wa.me/${wa}`:'#';
+    return `<div class="abandoned-card">
+      <div class="abandoned-top">
+        <div>
+          <div class="abandoned-phone">${esc(r.phone)}</div>
+          <div class="abandoned-time">Dernière activité : ${esc(when)}</div>
+        </div>
+        <div class="abandoned-amount">${amount?money(amount):''}</div>
+      </div>
+      <div class="abandoned-items">${details}</div>
+      <div class="abandoned-actions">
+        ${wa?`<a class="abandoned-wa" href="${waHref}" target="_blank" rel="noopener">Contacter sur WhatsApp</a>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
 function renderAnalytics(){
   const t=analyticsFor(localDayStart(0)),w=analyticsFor(localDayStart(6));
   aVisitsToday.textContent=t.visits;aUniqueToday.textContent=t.unique;aCartsToday.textContent=t.carts;aAbandonedToday.textContent=t.abandoned;aOrdersToday.textContent=t.orders;
   aVisits7.textContent=`7 derniers jours : ${w.visits}`;aUnique7.textContent=`7 derniers jours : ${w.unique}`;aCarts7.textContent=`7 derniers jours : ${w.carts}`;aAbandoned7.textContent=`7 derniers jours : ${w.abandoned}`;
   const rate=w.carts?Math.round((w.orders/w.carts)*100):0;aConversion7.textContent=`Taux de finalisation 7 j : ${rate} %`;
+  renderAbandonedContacts();
 }
 async function loadAnalytics(){
   const since=new Date(Date.now()-30*24*60*60*1000).toISOString();
-  const {data,error}=await sb.from('site_events').select('event_type,session_id,visitor_id,created_at').gte('created_at',since).order('created_at',{ascending:false});
+  const {data,error}=await sb.from('site_events').select('event_type,session_id,visitor_id,metadata,created_at').gte('created_at',since).order('created_at',{ascending:false});
   if(error){
     const msg=String(error.message||'');
     if(error.code==='42P01'||error.code==='PGRST205'||msg.toLowerCase().includes('site_events')){
