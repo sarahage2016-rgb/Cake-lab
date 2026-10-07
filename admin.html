@@ -110,7 +110,7 @@ button{cursor:pointer}
         </div>
       </div>
       <div class="panel">
-        <div class="panel-head"><div><h2>Paniers non finalisés identifiés</h2><p>Le numéro apparaît seulement si le client l’a lui-même saisi dans le formulaire. Un panier s’affiche ici après 2 minutes sans commande confirmée.</p></div></div>
+        <div class="panel-head"><div><h2>Paniers non finalisés identifiés</h2><p>Le numéro apparaît seulement si le client l’a lui-même saisi dans le formulaire. Un panier s’affiche ici après 30 minutes sans commande confirmée.</p></div></div>
         <div class="abandoned-list" id="abandonedContactList"></div>
       </div>
       <div class="panel">
@@ -366,7 +366,7 @@ function analyticsFor(since){
   const carts=ev.filter(e=>e.event_type==='cart_started');
   const completed=ev.filter(e=>e.event_type==='order_completed');
   const completedSessions=new Set(siteEvents.filter(e=>e.event_type==='order_completed').map(e=>e.session_id));
-  const cutoff=Date.now()-2*60*1000;
+  const cutoff=Date.now()-30*60*1000;
   const abandonedSessions=new Set(carts.filter(e=>new Date(e.created_at).getTime()<=cutoff&&!completedSessions.has(e.session_id)).map(e=>e.session_id));
   return {visits:visits.length,unique:uniqueCount(visits,'visitor_id'),carts:uniqueCount(carts,'session_id'),abandoned:abandonedSessions.size,orders:uniqueCount(completed,'session_id')}
 }
@@ -381,7 +381,7 @@ function normalizedWhatsAppPhone(raw=''){
 }
 function abandonedContacts(){
   const completedSessions=new Set(siteEvents.filter(e=>e.event_type==='order_completed').map(e=>e.session_id));
-  const cutoff=Date.now()-2*60*1000;
+  const cutoff=Date.now()-30*60*1000;
   const sessions=new Map();
 
   for(const e of siteEvents){
