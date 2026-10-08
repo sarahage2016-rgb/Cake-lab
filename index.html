@@ -104,25 +104,36 @@ button,.hit,.delivery-hit,.confirm-hit,.wave-hit,.back-hit,.checkout-cart-hit,
   content:"";
   position:absolute;
   inset:0;
-  background:linear-gradient(90deg,
-    rgba(249,221,217,.98) 0%,
-    rgba(249,221,217,.96) 32%,
-    rgba(249,221,217,.84) 42%,
-    rgba(249,221,217,.30) 55%,
-    rgba(249,221,217,0) 68%);
+  background:linear-gradient(180deg,rgba(255,248,242,.08),rgba(255,248,242,.08));
+  pointer-events:none;
 }
 .month-unified-content{
   position:absolute;
-  left:4.5%;
-  top:7%;
-  width:41%;
-  height:86%;
+  left:3.2%;
+  top:8%;
+  width:39%;
+  height:84%;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
   text-align:center;
   color:#3b160e;
+  padding:1.1% 1.2%;
+  z-index:1;
+}
+.month-unified-content::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:16px;
+  background:linear-gradient(90deg,
+    rgba(255,246,241,.86) 0%,
+    rgba(255,246,241,.72) 58%,
+    rgba(255,246,241,.34) 82%,
+    rgba(255,246,241,0) 100%);
+  box-shadow:0 0 0 1px rgba(106,44,27,.04) inset;
+  z-index:-1;
 }
 .month-unified-badge{
   background:rgba(255,250,243,.94);
