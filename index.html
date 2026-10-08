@@ -91,7 +91,6 @@ button,.hit,.delivery-hit,.confirm-hit,.wave-hit,.back-hit,.checkout-cart-hit,
 </style>
 <style id="cake-lab-safe-admin-sync">
 .admin-live{position:absolute;inset:0;z-index:18;pointer-events:none}
-
 .month-unified{
   position:absolute;
   overflow:hidden;
@@ -104,7 +103,7 @@ button,.hit,.delivery-hit,.confirm-hit,.wave-hit,.back-hit,.checkout-cart-hit,
   content:"";
   position:absolute;
   inset:0;
-  background:linear-gradient(180deg,rgba(255,248,242,.08),rgba(255,248,242,.08));
+  background:linear-gradient(90deg,rgba(255,246,241,.08),rgba(255,246,241,.08));
   pointer-events:none;
 }
 .month-unified-content{
@@ -128,8 +127,8 @@ button,.hit,.delivery-hit,.confirm-hit,.wave-hit,.back-hit,.checkout-cart-hit,
   inset:0;
   border-radius:16px;
   background:linear-gradient(90deg,
-    rgba(255,246,241,.86) 0%,
-    rgba(255,246,241,.72) 58%,
+    rgba(255,246,241,.88) 0%,
+    rgba(255,246,241,.76) 58%,
     rgba(255,246,241,.34) 82%,
     rgba(255,246,241,0) 100%);
   box-shadow:0 0 0 1px rgba(106,44,27,.04) inset;
@@ -654,7 +653,7 @@ function clcakes(){
  const c=[[3,18.9,31,14.1],[35.55,18.9,30.45,14.1],[67.45,18.9,29.7,14.1],[3,46.3,31,14],[35.55,46.3,30.45,14],[67.45,46.3,29.7,14]];
  let h='';ids.forEach((pid,i)=>{const r=clr(pid),u=clu(r);if(r&&r.active!==false&&u)h+=clpic(...c[i],u)});
  const m=CLROWS.find(r=>r.is_month===true&&r.active!==false),mu=clu(m);
- if(mu)h+=clmonthcard(3.0,72.55,94.2,24.15,mu,m);
+ if(m&&mu)h+=clmonthcard(3,72.55,94.2,24.15,mu,m);
  const ps=ids.map(clr).filter(r=>r&&r.active!==false).map(r=>Number(r.price||0)).filter(n=>n>0);
  if(ps.length){const same=ps.every(v=>v===ps[0]),n=same?ps[0]:Math.min(...ps);h+=`<div class="admin-price" style="left:14.2%;top:14.55%;width:71.6%;height:3.25%">🧁&nbsp; ${same?'Tous nos cakes classiques sont à':'Cakes classiques à partir de'} <b>${new Intl.NumberFormat('fr-FR').format(n)} F</b></div>`}
  el.innerHTML=h;
