@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#fffaf5">
+<title>Cake Lab</title>
+<style>
+:root{--brown:#4b1f12;--cream:#fffaf5;--line:#ead8ca}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f4ece5;color:var(--brown);font-family:Georgia,"Times New Roman",serif}
+button{font:inherit}.site{max-width:1100px;margin:auto;background:var(--cream);min-height:100vh}
+header{height:76px;display:grid;grid-template-columns:80px 1fr 80px;align-items:center;padding:0 22px;background:#fffdf9;border-bottom:1px solid #eee2d9}
+.menu{font:34px/1 Arial;background:none;border:0;color:var(--brown)}.brand{text-align:center;font-size:48px;font-weight:700}.cart{justify-self:end;position:relative;background:none;border:0;font-size:32px}.count{position:absolute;right:-8px;top:-7px;background:var(--brown);color:white;font:700 12px Arial;width:24px;height:24px;border-radius:50%;display:grid;place-items:center}
+.hero{min-height:310px;display:grid;grid-template-columns:44% 56%;align-items:center;background:#f7dfcf;overflow:hidden}.hero-copy{padding:35px 25px 35px 70px}.hero h1{font-family:"Brush Script MT","Segoe Script",cursive;font-size:55px;line-height:.95;font-weight:400;margin:0 0 12px}.hero p{font-size:29px;line-height:1.08;margin:0}.hero img{width:100%;height:310px;object-fit:cover;display:block}
+.notice{margin:14px 32px 8px;background:linear-gradient(90deg,#fff6ef,#fae9dc,#fff6ef);border:1px solid #f0d9c9;border-radius:18px;padding:15px 18px;text-align:center}.notice strong{font-size:28px}.notice p{margin:4px 0 0;font-size:18px}
+.section-title{text-align:center;margin:22px 0 12px}.section-title h2{font-size:43px;margin:0}.section-title p{margin:3px 0 0;font-size:19px;color:#704d3e}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding:0 40px 24px}.card{background:white;border:1px solid #eadfd7;border-radius:16px;overflow:hidden}.card img{width:100%;height:176px;object-fit:cover;display:block}.card h3{text-align:center;font-size:24px;margin:8px 8px 6px}.card button,.salty button{display:block;margin:0 auto 14px;background:linear-gradient(180deg,#6f2d13,#4b1f12);border:0;color:white;border-radius:999px;padding:12px 25px;font-weight:700}
+.saltes{padding:4px 34px 35px}.salty{display:grid;grid-template-columns:65% 35%;background:white;border:1px solid #eadfd7;border-radius:17px;overflow:hidden}.salty img{width:100%;height:235px;object-fit:cover}.salty-copy{display:grid;place-content:center;text-align:center;padding:18px}.salty-copy h3{font-size:30px;margin:0 0 15px}
+.view{display:none;padding-bottom:35px}.view.active{display:block}.back{margin:20px 30px 0;background:none;border:1px solid var(--brown);color:var(--brown);border-radius:999px;padding:9px 16px}.products{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:20px 34px}.product{background:#fff;border:1px solid #eadfd7;border-radius:15px;overflow:hidden}.product img{width:100%;height:215px;object-fit:cover}.product .txt{padding:14px}.product h3{margin:0 0 5px;font-size:24px}.product p{margin:0 0 10px;color:#705043;font-family:Arial,sans-serif;font-size:14px}.price{font-weight:700;font-size:18px}.add{float:right;background:var(--brown);color:#fff;border:0;border-radius:999px;padding:8px 16px}
+.drawer{position:fixed;inset:0 auto 0 0;width:min(82vw,360px);background:#fffaf5;z-index:50;transform:translateX(-100%);transition:.2s;padding:25px}.drawer.open{transform:none}.drawer button{display:block;width:100%;padding:16px 3px;background:none;border:0;border-bottom:1px solid #ead8ca;text-align:left;color:var(--brown);font-weight:700}.close{font-size:26px!important;text-align:right!important;border:0!important}
+footer{text-align:center;padding:28px;color:#7d5c4d;border-top:1px solid #ead8ca}
+@media(max-width:700px){header{height:68px;grid-template-columns:58px 1fr 58px;padding:0 12px}.brand{font-size:38px}.menu{font-size:30px}.hero{grid-template-columns:1fr}.hero-copy{padding:30px 28px}.hero h1{font-size:45px}.hero p{font-size:24px}.hero img{height:240px}.notice{margin:13px 16px 5px}.notice strong{font-size:24px}.notice p{font-size:16px}.section-title h2{font-size:36px}.grid{grid-template-columns:repeat(2,1fr);gap:12px;padding:0 14px 22px}.card img{height:145px}.card h3{font-size:20px}.card button{padding:10px 14px;font-size:14px}.saltes{padding:0 14px 28px}.salty{grid-template-columns:1fr}.salty img{height:205px}.products{grid-template-columns:1fr;padding:16px}}
+</style>
+</head>
+<body>
+<div class="site">
+<header>
+<button class="menu" onclick="toggleMenu()">☰</button>
+<div class="brand">Cake Lab</div>
+<button class="cart">🛍<span class="count" id="count">0</span></button>
+</header>
+<div class="drawer" id="drawer">
+<button class="close" onclick="toggleMenu()">×</button>
+<button onclick="showHome();toggleMenu()">Accueil</button>
+<button onclick="openCat('classiques');toggleMenu()">Classiques</button>
+<button onclick="openCat('fruites');toggleMenu()">Fruités</button>
+<button onclick="openCat('kids');toggleMenu()">Kids</button>
+<button onclick="openCat('alleges');toggleMenu()">Allégés en sucre</button>
+<button onclick="openCat('teranga');toggleMenu()">Cakes Teranga 🇸🇳</button>
+<button onclick="openCat('sales');toggleMenu()">Cakes salés</button>
+</div>
+<main id="home" class="view active">
+<section class="hero">
+<div class="hero-copy"><h1>Des cakes pour<br>toutes vos envies ♡</h1><p>Gourmands et préparés<br>avec soin</p></div>
+<img src="https://raw.githubusercontent.com/sarahage2016-rgb/Cake-lab/main/cl-home.webp" alt="Cake Lab">
+</section>
+<section class="notice"><strong>◷ &nbsp; Commande 24 heures à l’avance</strong><p>Sur commande pour garantir des cakes toujours frais.</p></section>
+<div class="section-title"><h2>Nos catégories</h2><p>Découvrez nos délicieux cakes, pour tous les goûts !</p></div>
+<section class="grid">
+<article class="card"><img src="https://raw.githubusercontent.com/sarahage2016-rgb/Cake-lab/main/cl-chocolat.webp"><h3>Classiques</h3><button onclick="openCat('classiques')">Voir la sélection</button></article>
+<article class="card"><img src="https://raw.githubusercontent.com/sarahage2016-rgb/Cake-lab/main/cl-mangue.webp"><h3>Fruités</h3><button onclick="openCat('fruites')">Voir la sélection</button></article>
+<article class="card"><img src="https://raw.githubusercontent.com/sarahage2016-rgb/Cake-lab/main/cl-citron.webp"><h3>Kids</h3><button onclick="openCat('kids')">Voir la sélection</button></article>
+<article class="card"><img src="https://raw.githubusercontent.com/sarahage2016-rgb/Cake-lab/main/cl-chocolat.webp"><h3>Allégés en sucre</h3><button onclick="openCat('alleges')">Voir la sélection</button></article>
+<article class="card"><img src="https://raw.githubusercontent.com/sarahage2016-rgb/Cake-lab/main/cl-bissap.webp"><h3>Cakes Teranga 🇸🇳</h3><button onclick="openCat('teranga')">Voir la sélection</button></article>
+</section>
+<div class="section-title"><h2>Nos Cakes salés</h2><p>Des recettes savoureuses pour toutes vos occasions !</p></div>
+<section class="saltes"><article class="salty"><img src="https://raw.githubusercontent.com/sarahage2016-rgb/Cake-lab/main/cl-catalogue.webp"><div class="salty-copy"><h3>Nos cakes salés</h3><button onclick="openCat('sales')">Voir la sélection</button></div></article></section>
+</main>
+<section id="category" class="view"><button class="back" onclick="showHome()">← Retour aux catégories</button><div class="section-title"><h2 id="catTitle"></h2><p id="catSub"></p></div><div class="products" id="products"></div></section>
+<footer>CAKE LAB • Cakes sur commande à Dakar</footer>
+</div>
+<script>
+const DATA={
+classiques:{title:"Nos cakes classiques",sub:"8 parts • 10 000 FCFA",items:[["Moka Café","Cake moelleux au café, finition moka.","cl-moka.webp","10 000 F"],["Chocolat","Cake chocolat gourmand et fondant.","cl-chocolat.webp","10 000 F"],["Coco","Cake moelleux à la noix de coco.","cl-coco.webp","10 000 F"]]},
+fruites:{title:"Nos cakes fruités",sub:"Crème aux fruits ou glaçage fruité • 10 000 FCFA",items:[["Citron","Frais, parfumé et légèrement acidulé.","cl-citron.webp","10 000 F"],["Mangue","Cake fruité mangue, doux et gourmand.","cl-mangue.webp","10 000 F"],["Orange","Cake moelleux aux notes d’orange.","cl-home.webp","10 000 F"],["Fraise","Cake fruité à la fraise.","cl-mangue.webp","10 000 F"]]},
+kids:{title:"Nos cakes Kids",sub:"Des saveurs gourmandes et colorées • 10 000 FCFA",items:[["Fraise Pop","Crème fraise et vermicelles colorés.","cl-mangue.webp","10 000 F"],["Popcorn Crush","Caramel et touche de popcorn.","cl-moka.webp","10 000 F"],["Cotton Candy","Glaçage rose clair au goût barbe à papa.","cl-citron.webp","10 000 F"],["Coco Choco","Coco chocolat façon Bounty.","cl-coco.webp","10 000 F"]]},
+alleges:{title:"Nos cakes allégés en sucre",sub:"Des recettes plus légères • 10 000 FCFA",items:[["Orange","Orange douce et parfumée.","cl-home.webp","10 000 F"],["Cappuccino Vanille","Cappuccino et vanille.","cl-moka.webp","10 000 F"],["Framboise Citron","Fruit rouge et fraîcheur citronnée.","cl-citron.webp","10 000 F"],["Chocolat Intense","Chocolat intense, sans topping.","cl-chocolat.webp","10 000 F"]]},
+teranga:{title:"Les Cakes Teranga 🇸🇳",sub:"Des saveurs inspirées du Sénégal • 10 000 FCFA",items:[["Bissap","Bissap gourmand et délicatement parfumé.","cl-bissap.webp","10 000 F"],["Gingembre Vanille","Gingembre adouci par la vanille.","cl-vanille.webp","10 000 F"],["Guérté","Cake gourmand à l’arachide.","cl-coco.webp","10 000 F"],["Bouye Vanille","Bouye bien présent, adouci par la vanille.","cl-vanille.webp","10 000 F"]]},
+sales:{title:"Nos cakes salés",sub:"Sur commande • format à partager",items:[["Pizza Melt","Cake salé généreux façon pizza.","cl-home.webp","8 000 F"],["Thon, Kiri & poivrons","Thon, Kiri et poivrons.","cl-catalogue.webp","9 000 F"],["Zwan, emmental & Kiri","Zwan, emmental et Kiri.","cl-catalogue.webp","8 500 F"],["Patatesli Kek","Cake turc aux pommes de terre.","cl-catalogue.webp","7 500 F"]]}
+};
+let cart=0;
+function toggleMenu(){drawer.classList.toggle("open")}
+function showHome(){category.classList.remove("active");home.classList.add("active");scrollTo(0,0)}
+function openCat(key){const d=DATA[key];home.classList.remove("active");category.classList.add("active");catTitle.textContent=d.title;catSub.textContent=d.sub;products.innerHTML=d.items.map(i=>'<article class="product"><img src="https://raw.githubusercontent.com/sarahage2016-rgb/Cake-lab/main/'+i[2]+'"><div class="txt"><h3>'+i[0]+'</h3><p>'+i[1]+'</p><span class="price">'+i[3]+'</span><button class="add" onclick="addCart()">Ajouter</button><div style="clear:both"></div></div></article>').join("");scrollTo(0,0)}
+function addCart(){cart++;count.textContent=cart}
+</script>
+</body></html>
